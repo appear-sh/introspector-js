@@ -1,12 +1,11 @@
 import {
-  type Report,
   type Payload,
   type Primitive,
-  type AppearReporter,
-  captureReport,
+  type Operation,
+  captureOperation,
 } from "./";
 
-export function hookFetch(reporter?: AppearReporter) {
+export function hookFetch(): typeof fetch {
   const originalFetch = globalThis.fetch;
 
   globalThis.fetch = (async (input: any, init?: any) => {
@@ -34,30 +33,27 @@ export function hookFetch(reporter?: AppearReporter) {
       await clonedResponse.json()
     );
 
-    const report: Report = {
-      reporter: reporter ?? {},
-      operations: [
-        {
-          request: {
-            method: init?.method ?? "GET",
-            uri: url,
-            headers: init?.headers as Record<string, Primitive>,
-            query: {},
-            body: sanitisedRequestBody,
-          },
-          response: {
-            headers: Object.fromEntries(clonedResponse.headers.entries()),
-            body: sanitisedResponseBody,
-            statusCode: clonedResponse.status,
-          },
-        },
-      ],
+    const operation: Operation = {
+      request: {
+        method: init?.method ?? "GET",
+        uri: url,
+        headers: init?.headers as Record<string, Primitive>,
+        query: {},
+        body: sanitisedRequestBody,
+      },
+      response: {
+        headers: Object.fromEntries(clonedResponse.headers.entries()),
+        body: sanitisedResponseBody,
+        statusCode: clonedResponse.status,
+      },
     };
 
-    captureReport(report);
+    captureOperation(operation);
 
     return response;
   }) as typeof globalThis.fetch;
+
+  return originalFetch;
 }
 
 export function hookXMLHttpRequest() {
@@ -82,27 +78,22 @@ export function hookXMLHttpRequest() {
     this.addEventListener("load", function () {
       const urlString = typeof _url === "string" ? _url : _url.href;
 
-      const report: Report = {
-        reporter: {},
-        operations: [
-          {
-            request: {
-              method: _method,
-              uri: urlString,
-              headers: {}, // XMLHttpRequest does not expose headers directly
-              query: {}, // Likewise, query parameters are not exposed
-              body: mapPopulatedBodyToPayload(body),
-            },
-            response: {
-              headers: mapHeadersToRecord(this.getAllResponseHeaders()),
-              body: mapPopulatedBodyToPayload(this.responseText),
-              statusCode: this.status,
-            },
-          },
-        ],
+      const operation: Operation = {
+        request: {
+          method: _method,
+          uri: urlString,
+          headers: {}, // XMLHttpRequest does not expose headers directly
+          query: {}, // Likewise, query parameters are not exposed
+          body: mapPopulatedBodyToPayload(body),
+        },
+        response: {
+          headers: mapHeadersToRecord(this.getAllResponseHeaders()),
+          body: mapPopulatedBodyToPayload(this.responseText),
+          statusCode: this.status,
+        },
       };
 
-      captureReport(report);
+      captureOperation(operation);
     });
     return originalSend.apply(this, arguments as any);
   };

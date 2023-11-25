@@ -32,10 +32,10 @@ function doFetch() {
 (async () => {
   Appear.init(
     {
-      apiKey: "123",
+      apiKey: "example-testing-key",
     },
     {
-      name: "My-fetch-reporter",
+      name: "introspector-tests",
     }
   );
 

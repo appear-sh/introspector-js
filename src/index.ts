@@ -1,4 +1,9 @@
-import type { AppearConfig } from "./config";
+import {
+  type AppearConfig,
+  APPEAR_REPORTING_ENDPOINT,
+  APPEAR_SERVICE_NAME,
+  APPEAR_INTROSPECTOR_VERSION,
+} from "./config";
 
 import * as hooks from "./hooks";
 
@@ -16,29 +21,31 @@ export type AppearReporter = {
   [key: string]: string;
 };
 
-export type Report = {
-  reporter: AppearReporter;
-  operations: {
-    request: {
-      method: string; // done
-      uri: string; // done
-      headers: Record<string, Primitive>;
-      query: Record<string, Primitive>;
-      body: Payload;
-    };
-    response: {
-      headers: Record<string, string>;
-      body: Payload;
-      statusCode: number;
-    };
-  }[];
+export type Operation = {
+  request: {
+    method: string;
+    uri: string;
+    headers: Record<string, Primitive>;
+    query: Record<string, Primitive>;
+    body: Payload;
+  };
+  response: {
+    headers: Record<string, string>;
+    body: Payload;
+    statusCode: number;
+  };
 };
 
-const bufferedReports: Report[] = [];
+export type Report = {
+  reporter: AppearReporter;
+  operations: Operation[];
+};
 
-export function captureReport(report: Report) {
-  bufferedReports.push(report);
-  console.log("got new report:", JSON.stringify(report, null, 2));
+let bufferedOperations: Operation[] = [];
+
+export function captureOperation(operation: Operation) {
+  bufferedOperations.push(operation);
+  console.log("got new operation:", JSON.stringify(operation, null, 2));
 }
 
 interface AppearIntrospector {
@@ -49,22 +56,87 @@ export function init(
   config: AppearConfig,
   reporter?: AppearReporter
 ): AppearIntrospector {
-  function sendReports() {
-    // TODO: send
+  if (!reporter?.name) {
+    if (!APPEAR_SERVICE_NAME) {
+      throw new Error(
+        "A service name for Appear must be configured. Please see documentation."
+      );
+    }
 
-    console.debug("would send reports");
-    bufferedReports;
+    reporter = {
+      ...(reporter ?? {}),
+      name: APPEAR_SERVICE_NAME,
+    };
   }
 
-  const reportInterval = setInterval(() => {
-    sendReports();
-  }, config.reporting?.intervalSeconds ?? 5000);
+  let currentTimeout: NodeJS.Timeout | null = null;
 
-  function stop() {
-    clearInterval(reportInterval);
+  const originalFetch = hooks.hookFetch();
+
+  function queueSend() {
+    currentTimeout = setTimeout(
+      sendReports,
+      config.reporting?.intervalSeconds ?? 5000
+    );
   }
 
-  hooks.hookFetch(reporter);
+  async function sendReports() {
+    // Create a copy of the current operations
+    const operationsToSend = [...bufferedOperations];
+
+    if (operationsToSend.length === 0) {
+      return;
+    }
+
+    try {
+      const report: Report = {
+        reporter: reporter ?? {},
+        operations: operationsToSend,
+      };
+
+      const response = await originalFetch(APPEAR_REPORTING_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-API-Key": config.apiKey,
+          "X-Appear-Runtime": "nodejs",
+          "X-Appear-Introspector-Version":
+            APPEAR_INTROSPECTOR_VERSION.toString(),
+        },
+        body: JSON.stringify(report),
+      });
+
+      if (response.ok) {
+        // Remove the sent operations from bufferedOperations
+        bufferedOperations = bufferedOperations.filter(
+          (operation) => !operationsToSend.includes(operation)
+        );
+
+        console.log(
+          "[introspector] appear /reports response:",
+          await response.json()
+        );
+      } else {
+        // Handle non-successful responses
+        console.error("Failed to send reports:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error sending reports:", error);
+    }
+
+    queueSend();
+  }
+
+  async function stop() {
+    // Send any reports we've got
+    await sendReports();
+
+    if (currentTimeout) {
+      clearTimeout(currentTimeout);
+      currentTimeout = null;
+    }
+  }
+
   // hooks.hookXMLHttpRequest();
 
   return {
