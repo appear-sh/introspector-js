@@ -1,7 +1,6 @@
-import { BatchInterceptor } from "@mswjs/interceptors";
-import { ClientRequestInterceptor } from "@mswjs/interceptors/ClientRequest";
-import { XMLHttpRequestInterceptor } from "@mswjs/interceptors/XMLHttpRequest";
+import { BatchInterceptor, Interceptor } from "@mswjs/interceptors";
 import { FetchInterceptor } from "@mswjs/interceptors/fetch";
+import * as jsEnv from "browser-or-node";
 
 import {
   type Payload,
@@ -12,14 +11,29 @@ import {
 
 import { APPEAR_REPORTING_ENDPOINT } from "./config";
 
-export function hook() {
+console.log(jsEnv.isBrowser);
+console.log(jsEnv.isNode);
+
+export async function hook() {
+  const interceptors: Interceptor<any>[] = [new FetchInterceptor()];
+
+  if (jsEnv.isBrowser) {
+    const { XMLHttpRequestInterceptor } = await import(
+      "@mswjs/interceptors/XMLHttpRequest"
+    );
+    interceptors.push(new XMLHttpRequestInterceptor());
+  }
+
+  if (jsEnv.isNode) {
+    const { ClientRequestInterceptor } = await import(
+      "@mswjs/interceptors/ClientRequest"
+    );
+    interceptors.push(new ClientRequestInterceptor());
+  }
+
   const interceptor = new BatchInterceptor({
     name: "appear-introspector",
-    interceptors: [
-      new ClientRequestInterceptor(),
-      new XMLHttpRequestInterceptor(),
-      new FetchInterceptor(),
-    ],
+    interceptors,
   });
 
   interceptor.apply();

@@ -58,7 +58,7 @@ function doAxiosNodeNative() {
 }
 
 (async () => {
-  Appear.init(
+  await Appear.init(
     {
       apiKey: "example-testing-key",
     },

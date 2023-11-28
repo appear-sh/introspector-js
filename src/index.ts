@@ -51,11 +51,11 @@ interface AppearIntrospector {
   stop: () => void;
 }
 
-export function init(
+export async function init(
   config: AppearConfig,
   reporter?: AppearReporter
-): AppearIntrospector {
-  hook();
+): Promise<AppearIntrospector> {
+  await hook();
 
   if (!reporter?.name) {
     if (!APPEAR_SERVICE_NAME) {
