@@ -1,3 +1,8 @@
+import { BatchInterceptor } from "@mswjs/interceptors";
+import { ClientRequestInterceptor } from "@mswjs/interceptors/ClientRequest";
+import { XMLHttpRequestInterceptor } from "@mswjs/interceptors/XMLHttpRequest";
+import { FetchInterceptor } from "@mswjs/interceptors/fetch";
+
 import {
   type Payload,
   type Primitive,
@@ -5,39 +10,67 @@ import {
   captureOperation,
 } from "./";
 
-export function hookFetch(): typeof fetch {
-  const originalFetch = globalThis.fetch;
+import { APPEAR_REPORTING_ENDPOINT } from "./config";
 
-  globalThis.fetch = (async (input: any, init?: any) => {
-    const response = await originalFetch(input, init);
-    const url =
-      input instanceof URL
-        ? input.href
-        : typeof input === "string"
-        ? input
-        : input.url;
+export function hook() {
+  const interceptor = new BatchInterceptor({
+    name: "appear-introspector",
+    interceptors: [
+      new ClientRequestInterceptor(),
+      new XMLHttpRequestInterceptor(),
+      new FetchInterceptor(),
+    ],
+  });
 
+  interceptor.apply();
+
+  const requests = new Map();
+
+  // Workaround for https://github.com/mswjs/interceptors/issues/419
+  interceptor.on("request", ({ request, requestId }) => {
+    requests.set(requestId, request.clone());
+  });
+
+  interceptor.on("response", async ({ requestId, response }) => {
+    const clonedRequest = requests.get(requestId);
     const clonedResponse = response.clone();
 
-    let requestBody = init?.body;
+    if (!clonedRequest) {
+      throw new Error("Could not find corresponding request for response.");
+    } else {
+      requests.delete(requestId);
+    }
 
-    // TODO only try this if content-type headers are set?
-    try {
-      requestBody = JSON.parse(requestBody);
-    } catch (e) {
-      // ignore
+    if (clonedRequest.url === APPEAR_REPORTING_ENDPOINT) {
+      // Ignore our own outbound requests.
+      return;
+    }
+
+    const url = clonedRequest.url;
+
+    let requestBody = clonedRequest.body;
+    let responseBody = clonedResponse.body;
+
+    if (
+      clonedRequest.headers.get("content-type")?.includes("application/json")
+    ) {
+      requestBody = await clonedRequest.json();
+    }
+
+    if (
+      clonedResponse.headers.get("content-type")?.includes("application/json")
+    ) {
+      responseBody = await clonedResponse.json();
     }
 
     const sanitisedRequestBody = mapPopulatedBodyToPayload(requestBody);
-    const sanitisedResponseBody = mapPopulatedBodyToPayload(
-      await clonedResponse.json()
-    );
+    const sanitisedResponseBody = mapPopulatedBodyToPayload(responseBody);
 
     const operation: Operation = {
       request: {
-        method: init?.method ?? "GET",
+        method: clonedRequest.method,
         uri: url,
-        headers: init?.headers as Record<string, Primitive>,
+        headers: Object.fromEntries(clonedRequest.headers.entries()),
         query: {},
         body: sanitisedRequestBody,
       },
@@ -49,75 +82,7 @@ export function hookFetch(): typeof fetch {
     };
 
     captureOperation(operation);
-
-    return response;
-  }) as typeof globalThis.fetch;
-
-  return originalFetch;
-}
-
-export function hookXMLHttpRequest() {
-  class ExtendedXMLHttpRequest extends XMLHttpRequest {
-    _method?: string;
-    _url?: string | URL;
-  }
-
-  const originalSend = ExtendedXMLHttpRequest.prototype.send;
-  const originalOpen = ExtendedXMLHttpRequest.prototype.open;
-
-  ExtendedXMLHttpRequest.prototype.open = function (method, url) {
-    this._method = method; // store method and URL for later use
-    this._url = url;
-    return originalOpen.apply(this, arguments as any);
-  };
-
-  ExtendedXMLHttpRequest.prototype.send = function (body) {
-    const _method = this._method!;
-    const _url = this._url!;
-
-    this.addEventListener("load", function () {
-      const urlString = typeof _url === "string" ? _url : _url.href;
-
-      const operation: Operation = {
-        request: {
-          method: _method,
-          uri: urlString,
-          headers: {}, // XMLHttpRequest does not expose headers directly
-          query: {}, // Likewise, query parameters are not exposed
-          body: mapPopulatedBodyToPayload(body),
-        },
-        response: {
-          headers: mapHeadersToRecord(this.getAllResponseHeaders()),
-          body: mapPopulatedBodyToPayload(this.responseText),
-          statusCode: this.status,
-        },
-      };
-
-      captureOperation(operation);
-    });
-    return originalSend.apply(this, arguments as any);
-  };
-
-  window.XMLHttpRequest = ExtendedXMLHttpRequest;
-}
-
-function mapHeadersToRecord(headers: string): Record<string, string> {
-  const arr = headers.trim().split(/[\r\n]+/);
-
-  // Create a map of header names to values
-  const headerMap: Record<string, string> = {};
-  arr.forEach((line) => {
-    const parts = line.split(": ");
-    const header = parts.shift();
-
-    // TODO: handle this more gracefully
-    if (!header) throw new Error("Somehow we got an undefined header value");
-
-    const value = parts.join(": ");
-    headerMap[header] = value;
   });
-
-  return headerMap;
 }
 
 function isPrimitive(value: any): value is Primitive {

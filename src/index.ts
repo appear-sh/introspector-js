@@ -4,8 +4,7 @@ import {
   APPEAR_SERVICE_NAME,
   APPEAR_INTROSPECTOR_VERSION,
 } from "./config";
-
-import * as hooks from "./hooks";
+import { hook } from "./hooks";
 
 export type Primitive =
   | "never"
@@ -25,7 +24,7 @@ export type Operation = {
   request: {
     method: string;
     uri: string;
-    headers: Record<string, Primitive>;
+    headers: Record<string, string>;
     query: Record<string, Primitive>;
     body: Payload;
   };
@@ -56,6 +55,8 @@ export function init(
   config: AppearConfig,
   reporter?: AppearReporter
 ): AppearIntrospector {
+  hook();
+
   if (!reporter?.name) {
     if (!APPEAR_SERVICE_NAME) {
       throw new Error(
@@ -70,8 +71,6 @@ export function init(
   }
 
   let currentTimeout: NodeJS.Timeout | null = null;
-
-  const originalFetch = hooks.hookFetch();
 
   function queueSend() {
     currentTimeout = setTimeout(
@@ -94,7 +93,7 @@ export function init(
         operations: operationsToSend,
       };
 
-      const response = await originalFetch(APPEAR_REPORTING_ENDPOINT, {
+      const response = await fetch(APPEAR_REPORTING_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -136,8 +135,6 @@ export function init(
       currentTimeout = null;
     }
   }
-
-  // hooks.hookXMLHttpRequest();
 
   return {
     stop,
