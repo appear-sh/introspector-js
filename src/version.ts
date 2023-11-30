@@ -1,1 +1,1 @@
-export const INTROSPECTOR_VERSION = "0.0.1";
+export const INTROSPECTOR_VERSION = "0.0.2";
