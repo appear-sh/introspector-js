@@ -1,9 +1,4 @@
-import {
-  type AppearConfig,
-  APPEAR_REPORTING_ENDPOINT,
-  APPEAR_SERVICE_NAME,
-  APPEAR_INTROSPECTOR_VERSION,
-} from "./config";
+import { type AppearConfig, gatherConfig } from "./config";
 import { hook } from "./hooks";
 
 export type Primitive =
@@ -55,10 +50,16 @@ export async function init(
   config: AppearConfig,
   reporter?: AppearReporter
 ): Promise<AppearIntrospector> {
-  await hook();
+  const internalConfig = gatherConfig();
+
+  console.log({
+    internalConfig,
+  });
+
+  await hook(internalConfig);
 
   if (!reporter?.name) {
-    if (!APPEAR_SERVICE_NAME) {
+    if (!internalConfig.serviceName) {
       throw new Error(
         "A service name for Appear must be configured. Please see documentation."
       );
@@ -66,7 +67,7 @@ export async function init(
 
     reporter = {
       ...(reporter ?? {}),
-      name: APPEAR_SERVICE_NAME,
+      name: internalConfig.serviceName,
     };
   }
 
@@ -93,14 +94,13 @@ export async function init(
         operations: operationsToSend,
       };
 
-      const response = await fetch(APPEAR_REPORTING_ENDPOINT, {
+      const response = await fetch(internalConfig.reportingEndpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-API-Key": config.apiKey,
           "X-Appear-Runtime": "nodejs",
-          "X-Appear-Introspector-Version":
-            APPEAR_INTROSPECTOR_VERSION.toString(),
+          "X-Appear-Introspector-Version": internalConfig.introspectorVersion,
         },
         body: JSON.stringify(report),
       });

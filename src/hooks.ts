@@ -9,12 +9,9 @@ import {
   captureOperation,
 } from "./";
 
-import { APPEAR_REPORTING_ENDPOINT } from "./config";
+import { InternalConfig } from "./config";
 
-console.log(jsEnv.isBrowser);
-console.log(jsEnv.isNode);
-
-export async function hook() {
+export async function hook(internalConfig: InternalConfig) {
   const interceptors: Interceptor<any>[] = [new FetchInterceptor()];
 
   if (jsEnv.isBrowser) {
@@ -55,7 +52,7 @@ export async function hook() {
       requests.delete(requestId);
     }
 
-    if (clonedRequest.url === APPEAR_REPORTING_ENDPOINT) {
+    if (clonedRequest.url === internalConfig.reportingEndpoint) {
       // Ignore our own outbound requests.
       return;
     }
