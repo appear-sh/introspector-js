@@ -5,6 +5,7 @@ import { INTROSPECTOR_VERSION } from "./version";
 export interface AppearConfig {
   apiKey: string;
 
+  sendImmediately?: boolean;
   sampleRate?: number;
 
   reporting?: {

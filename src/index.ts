@@ -37,11 +37,6 @@ export type Report = {
 
 let bufferedOperations: Operation[] = [];
 
-export function captureOperation(operation: Operation) {
-  bufferedOperations.push(operation);
-  console.log("got new operation:", JSON.stringify(operation, null, 2));
-}
-
 interface AppearIntrospector {
   stop: () => void;
 }
@@ -52,11 +47,14 @@ export async function init(
 ): Promise<AppearIntrospector> {
   const internalConfig = gatherConfig();
 
-  console.log({
-    internalConfig,
-  });
+  async function captureOperation(operation: Operation) {
+    bufferedOperations.push(operation);
+    if (config.sendImmediately) {
+      await sendReports();
+    }
+  }
 
-  await hook(internalConfig);
+  await hook(internalConfig, captureOperation);
 
   if (!reporter?.name) {
     if (!internalConfig.serviceName) {
@@ -123,6 +121,13 @@ export async function init(
       console.error("Error sending reports:", error);
     }
 
+    if (!config.sendImmediately) {
+      queueSend();
+    }
+  }
+
+  // Trigger first queueing
+  if (!config.sendImmediately) {
     queueSend();
   }
 

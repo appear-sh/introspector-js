@@ -1,14 +1,15 @@
 {
-  "name": "@appear.sh/introspector",
-  "version": "0.0.2",
+  "name": "@appear-sh/introspector",
+  "version": "0.0.3",
   "description": "",
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "export-version": "node -p \"'export const INTROSPECTOR_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
     "prebuild": "npm run export-version",
     "build": "npx tsc",
-    "postinstall": "npm run build"
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -30,5 +31,8 @@
   "dependencies": {
     "@mswjs/interceptors": "^0.25.12",
     "browser-or-node": "3.0.0-pre.0"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   }
 }

@@ -2,16 +2,14 @@ import { BatchInterceptor, Interceptor } from "@mswjs/interceptors";
 import { FetchInterceptor } from "@mswjs/interceptors/fetch";
 import * as jsEnv from "browser-or-node";
 
-import {
-  type Payload,
-  type Primitive,
-  type Operation,
-  captureOperation,
-} from "./";
+import { type Payload, type Primitive, type Operation } from "./";
 
 import { InternalConfig } from "./config";
 
-export async function hook(internalConfig: InternalConfig) {
+export async function hook(
+  internalConfig: InternalConfig,
+  captureOperation: (operation: Operation) => void
+) {
   const interceptors: Interceptor<any>[] = [new FetchInterceptor()];
 
   if (jsEnv.isBrowser) {
