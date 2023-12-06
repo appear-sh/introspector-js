@@ -75,16 +75,24 @@ export async function hook(
     const sanitisedRequestBody = mapPopulatedBodyToPayload(requestBody);
     const sanitisedResponseBody = mapPopulatedBodyToPayload(responseBody);
 
+    const sanitisedRequestHeaders = mapPopulatedBodyToPayload(
+      Object.fromEntries(clonedRequest.headers.entries())
+    ) as Record<string, string>;
+
+    const sanitisedResponseHeaders = mapPopulatedBodyToPayload(
+      Object.fromEntries(clonedResponse.headers.entries())
+    ) as Record<string, string>;
+
     const operation: Operation = {
       request: {
         method: clonedRequest.method,
         uri: url,
-        headers: Object.fromEntries(clonedRequest.headers.entries()),
+        headers: sanitisedRequestHeaders,
         query: {},
         body: sanitisedRequestBody,
       },
       response: {
-        headers: Object.fromEntries(clonedResponse.headers.entries()),
+        headers: sanitisedResponseHeaders,
         body: sanitisedResponseBody,
         statusCode: clonedResponse.status,
       },
