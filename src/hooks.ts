@@ -124,18 +124,6 @@ function mapPopulatedBodyToPayload(body: any): Payload {
     );
 
     return types as Payload;
-
-    // Below is for typescript type arrays.
-    // const arrayType = [...uniqueTypes];
-    // if (arrayType.length === 0) arrayType.push("never");
-
-    // let type = arrayType.join(" | ");
-
-    // if (arrayType.length > 1) {
-    //   type = `(${type})`;
-    // }
-
-    // return `${type}[]` as Payload;
   }
 
   if (typeof body === "object" && body !== null) {
