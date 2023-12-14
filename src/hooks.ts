@@ -4,13 +4,18 @@ import * as jsEnv from "browser-or-node";
 
 import { type Payload, type Primitive, type Operation } from "./";
 
-import { InternalConfig } from "./config";
+import { AppearConfig, InternalConfig } from "./config";
 
 export async function hook(
+  config: AppearConfig,
   internalConfig: InternalConfig,
   captureOperation: (operation: Operation) => void
 ) {
-  const interceptors: Interceptor<any>[] = [new FetchInterceptor()];
+  const interceptors: Interceptor<any>[] = [];
+
+  if (!config.disableXHRHook) {
+    interceptors.push(new FetchInterceptor());
+  }
 
   if (jsEnv.isBrowser) {
     const { XMLHttpRequestInterceptor } = await import(
@@ -41,8 +46,8 @@ export async function hook(
   });
 
   interceptor.on("response", async ({ requestId, response }) => {
-    const clonedRequest = requests.get(requestId);
-    const clonedResponse = response.clone();
+    const clonedRequest: Request = requests.get(requestId);
+    const clonedResponse: Response = response.clone();
 
     if (!clonedRequest) {
       throw new Error("Could not find corresponding request for response.");
@@ -52,6 +57,14 @@ export async function hook(
 
     if (clonedRequest.url === internalConfig.reportingEndpoint) {
       // Ignore our own outbound requests.
+      return;
+    }
+
+    if (
+      // Fetch & XHR
+      clonedRequest.destination !== ""
+    ) {
+      // Probably something we don't care about, ignore.
       return;
     }
 

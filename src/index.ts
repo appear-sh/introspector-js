@@ -54,7 +54,7 @@ export async function init(
     }
   }
 
-  await hook(internalConfig, captureOperation);
+  await hook(config, internalConfig, captureOperation);
 
   if (!reporter?.name) {
     if (!internalConfig.serviceName) {
