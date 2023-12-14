@@ -11,13 +11,9 @@ export async function hook(
   internalConfig: InternalConfig,
   captureOperation: (operation: Operation) => void
 ) {
-  const interceptors: Interceptor<any>[] = [];
+  const interceptors: Interceptor<any>[] = [new FetchInterceptor()];
 
-  if (!config.disableXHRHook) {
-    interceptors.push(new FetchInterceptor());
-  }
-
-  if (jsEnv.isBrowser) {
+  if (jsEnv.isBrowser && !config.disableXHRHook) {
     const { XMLHttpRequestInterceptor } = await import(
       "@mswjs/interceptors/XMLHttpRequest"
     );
