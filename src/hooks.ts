@@ -79,6 +79,9 @@ export async function hook(
       clonedResponse.headers.get("content-type")?.includes("application/json")
     ) {
       responseBody = await clonedResponse.json();
+    } else {
+      // Ignore anything that isn't a JSON payload response right now.
+      return;
     }
 
     const sanitisedRequestBody = mapPopulatedBodyToPayload(requestBody);
