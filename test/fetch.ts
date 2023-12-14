@@ -61,6 +61,7 @@ function doAxiosNodeNative() {
   await Appear.init(
     {
       apiKey: "example-testing-key",
+      sendImmediately: true,
     },
     {
       name: "introspector-tests",

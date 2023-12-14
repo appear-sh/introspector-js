@@ -5,6 +5,7 @@ import * as jsEnv from "browser-or-node";
 import { type Payload, type Primitive, type Operation } from "./";
 
 import { AppearConfig, InternalConfig } from "./config";
+import { identifyType } from "./contentType";
 
 export async function hook(
   config: AppearConfig,
@@ -124,15 +125,15 @@ function getType(value: any): Primitive {
   return typeof value as Primitive;
 }
 
-function mapPopulatedBodyToPayload(body: any): Payload {
+function mapPopulatedBodyToPayload(body: any, propName?: string): Payload {
   if (isPrimitive(body)) {
-    return getType(body);
+    return (identifyType(body, propName)?.type as Primitive) || getType(body);
   }
 
   if (Array.isArray(body)) {
     const types: string[] = [];
     body.forEach((item) =>
-      types.push(mapPopulatedBodyToPayload(item) as Primitive)
+      types.push(mapPopulatedBodyToPayload(item, propName) as Primitive)
     );
 
     return types as Payload;
@@ -142,7 +143,7 @@ function mapPopulatedBodyToPayload(body: any): Payload {
     const result: { [name: string]: Payload } = {};
     for (const key in body) {
       if (Object.prototype.hasOwnProperty.call(body, key)) {
-        result[key] = mapPopulatedBodyToPayload(body[key]);
+        result[key] = mapPopulatedBodyToPayload(body[key], key);
       }
     }
     return result;
