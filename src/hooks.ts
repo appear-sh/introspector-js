@@ -96,18 +96,27 @@ export async function hook(
       Object.fromEntries(clonedResponse.headers.entries())
     ) as Record<string, string>;
 
+    const query = [
+      ...new URL(url, "http://localhost").searchParams.entries(),
+    ].map(
+      ([key, value]) =>
+        [key, identifyType(value, key)?.type ?? "string"] as const
+    );
+
     const operation: Operation = {
       request: {
         method: clonedRequest.method,
         uri: url,
         headers: sanitisedRequestHeaders,
-        query: {},
+        query: query,
         body: sanitisedRequestBody,
+        bodyType: clonedRequest.headers.get("content-type"),
       },
       response: {
         headers: sanitisedResponseHeaders,
         body: sanitisedResponseBody,
         statusCode: clonedResponse.status,
+        bodyType: clonedResponse.headers.get("content-type"),
       },
     };
 
