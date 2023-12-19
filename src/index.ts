@@ -14,13 +14,13 @@ export type Operation = {
   request: {
     method: string;
     uri: string;
-    headers: Record<string, string>;
+    headers: (readonly [string, Primitive])[];
     query: (readonly [string, Primitive])[];
     body: Payload;
     bodyType: string | null;
   };
   response: {
-    headers: Record<string, string>;
+    headers: (readonly [string, Primitive])[];
     body: Payload;
     bodyType: string | null;
     statusCode: number;
