@@ -88,26 +88,37 @@ export async function hook(
     const sanitisedRequestBody = mapPopulatedBodyToPayload(requestBody);
     const sanitisedResponseBody = mapPopulatedBodyToPayload(responseBody);
 
-    const sanitisedRequestHeaders = mapPopulatedBodyToPayload(
-      Object.fromEntries(clonedRequest.headers.entries())
-    ) as Record<string, string>;
+    const sanitisedRequestHeaders = [...clonedRequest.headers.entries()].map(
+      ([name, value]) =>
+        [name, identifyType(value, name)?.type ?? "string"] as const
+    );
 
-    const sanitisedResponseHeaders = mapPopulatedBodyToPayload(
-      Object.fromEntries(clonedResponse.headers.entries())
-    ) as Record<string, string>;
+    const sanitisedResponseHeaders = [...clonedResponse.headers.entries()].map(
+      ([name, value]) =>
+        [name, identifyType(value, name)?.type ?? "string"] as const
+    );
+
+    const query = [
+      ...new URL(url, "http://localhost").searchParams.entries(),
+    ].map(
+      ([key, value]) =>
+        [key, identifyType(value, key)?.type ?? "string"] as const
+    );
 
     const operation: Operation = {
       request: {
         method: clonedRequest.method,
         uri: url,
         headers: sanitisedRequestHeaders,
-        query: {},
+        query: query,
         body: sanitisedRequestBody,
+        bodyType: clonedRequest.headers.get("content-type"),
       },
       response: {
         headers: sanitisedResponseHeaders,
         body: sanitisedResponseBody,
         statusCode: clonedResponse.status,
+        bodyType: clonedResponse.headers.get("content-type"),
       },
     };
 

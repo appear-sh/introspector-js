@@ -1,13 +1,8 @@
 import { type AppearConfig, gatherConfig } from "./config";
+import { CONTENT_TYPES } from "./contentType";
 import { hook } from "./hooks";
 
-export type Primitive =
-  | "never"
-  | "string"
-  | "number"
-  | "boolean"
-  | "undefined"
-  | "null"; // todo detect also types like iso8601, uuid, etc
+export type Primitive = keyof typeof CONTENT_TYPES;
 
 export type Payload = Primitive | Payload[] | { [name: string]: Payload };
 
@@ -19,13 +14,15 @@ export type Operation = {
   request: {
     method: string;
     uri: string;
-    headers: Record<string, string>;
-    query: Record<string, Primitive>;
+    headers: (readonly [string, Primitive])[];
+    query: (readonly [string, Primitive])[];
     body: Payload;
+    bodyType: string | null;
   };
   response: {
-    headers: Record<string, string>;
+    headers: (readonly [string, Primitive])[];
     body: Payload;
+    bodyType: string | null;
     statusCode: number;
   };
 };
