@@ -57,6 +57,12 @@ export const CONTENT_TYPES = {
     match: (input: unknown) => !isNaN(Number(input)),
   },
   // BASE string
+  booleanString: {
+    tags: ["boolean"] as const,
+    base: "string",
+    match: (input: unknown) =>
+      typeof input === "string" && ["true", "false"].includes(input),
+  },
   uuid: {
     tags: ["id", "url-variable"] as const,
     base: "string",
