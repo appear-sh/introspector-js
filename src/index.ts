@@ -42,6 +42,13 @@ export async function init(
   config: AppearConfig,
   reporter?: AppearReporter
 ): Promise<AppearIntrospector> {
+  if (config.enabled === false) {
+    // Short-circuit everything, do nothing.
+    return {
+      stop: () => {},
+    };
+  }
+
   const internalConfig = gatherConfig();
 
   async function captureOperation(operation: Operation) {
