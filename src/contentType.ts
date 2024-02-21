@@ -232,10 +232,7 @@ export const getType = (typeName: string) => {
   return undefined;
 };
 
-export const identifyTypeFromPropName = (
-  base: JSON_TYPES,
-  propName?: string
-) => {
+const identifyTypeFromPropName = (base: JSON_TYPES, propName?: string) => {
   if (!propName) return undefined;
 
   // optional detection from prop name

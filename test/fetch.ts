@@ -65,6 +65,7 @@ function doAxiosNodeNative() {
     },
     {
       name: "introspector-tests",
+      environment: "introspector-js-testing",
     }
   );
 

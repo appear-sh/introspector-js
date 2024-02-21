@@ -2,9 +2,9 @@ import { type AppearConfig, gatherConfig } from "./config";
 import { CONTENT_TYPES } from "./contentType";
 import { hook } from "./hooks";
 
-export type Primitive = keyof typeof CONTENT_TYPES;
+import { JSONSchema7 } from "json-schema";
 
-export type Payload = Primitive | Payload[] | { [name: string]: Payload };
+export type Format = keyof typeof CONTENT_TYPES;
 
 export type AppearReporter = {
   [key: string]: string;
@@ -14,16 +14,14 @@ export type Operation = {
   request: {
     method: string;
     uri: string;
-    headers: (readonly [string, Primitive])[];
-    query: (readonly [string, Primitive])[];
-    body: Payload;
-    bodyType: string | null;
+    headers: Record<string, JSONSchema7>;
+    query: Record<string, JSONSchema7>;
+    body: JSONSchema7;
   };
   response: {
-    headers: (readonly [string, Primitive])[];
-    body: Payload;
-    bodyType: string | null;
+    headers: Record<string, JSONSchema7>;
     statusCode: number;
+    body: JSONSchema7;
   };
 };
 

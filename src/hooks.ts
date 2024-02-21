@@ -2,10 +2,12 @@ import { BatchInterceptor, Interceptor } from "@mswjs/interceptors";
 import { FetchInterceptor } from "@mswjs/interceptors/fetch";
 import * as jsEnv from "browser-or-node";
 
-import { type Payload, type Primitive, type Operation } from "./";
+import { type Operation } from "./";
 
 import { AppearConfig, InternalConfig } from "./config";
-import { identifyType } from "./contentType";
+import { getType, identifyType } from "./contentType";
+
+import { JSONSchema7, JSONSchema7TypeName } from "json-schema";
 
 export async function hook(
   config: AppearConfig,
@@ -85,25 +87,31 @@ export async function hook(
       return;
     }
 
-    const sanitisedRequestBody = mapPopulatedBodyToPayload(requestBody);
-    const sanitisedResponseBody = mapPopulatedBodyToPayload(responseBody);
+    const sanitisedRequestBody = mapValueToSchema(requestBody);
+    const sanitisedResponseBody = mapValueToSchema(responseBody);
 
-    const sanitisedRequestHeaders = [...clonedRequest.headers.entries()].map(
-      ([name, value]) =>
-        [name, identifyType(value, name)?.type ?? "string"] as const
-    );
+    const requestContentType = clonedRequest.headers.get("content-type");
+    const responseContentType = clonedResponse.headers.get("content-type");
 
-    const sanitisedResponseHeaders = [...clonedResponse.headers.entries()].map(
-      ([name, value]) =>
-        [name, identifyType(value, name)?.type ?? "string"] as const
-    );
+    if (requestContentType) {
+      sanitisedRequestBody.contentMediaType = requestContentType;
+    }
 
-    const query = [
+    if (responseContentType) {
+      sanitisedResponseBody.contentMediaType = responseContentType;
+    }
+
+    const sanitisedRequestHeaders = kvToSchema([
+      ...clonedRequest.headers.entries(),
+    ]);
+
+    const sanitisedResponseHeaders = kvToSchema([
+      ...clonedResponse.headers.entries(),
+    ]);
+
+    const query = kvToSchema([
       ...new URL(url, "http://localhost").searchParams.entries(),
-    ].map(
-      ([key, value]) =>
-        [key, identifyType(value, key)?.type ?? "string"] as const
-    );
+    ]);
 
     const operation: Operation = {
       request: {
@@ -112,13 +120,11 @@ export async function hook(
         headers: sanitisedRequestHeaders,
         query: query,
         body: sanitisedRequestBody,
-        bodyType: clonedRequest.headers.get("content-type"),
       },
       response: {
         headers: sanitisedResponseHeaders,
         body: sanitisedResponseBody,
         statusCode: clonedResponse.status,
-        bodyType: clonedResponse.headers.get("content-type"),
       },
     };
 
@@ -126,38 +132,64 @@ export async function hook(
   });
 }
 
-function isPrimitive(value: any): value is Primitive {
-  const validPrimitives = ["string", "number", "boolean", "undefined", "null"];
+function isPrimitive(value: any): value is JSONSchema7TypeName {
+  const validPrimitives = ["string", "number", "integer", "boolean", "null"];
   return validPrimitives.includes(typeof value) || value === null;
 }
 
-function getType(value: any): Primitive {
-  if (value === null) return "null";
-  return typeof value as Primitive;
+function kvToSchema(values: [string, unknown][]): Record<string, JSONSchema7> {
+  return values.reduce<Record<string, JSONSchema7>>((out, [name, value]) => {
+    out[name] = mapValueToSchema(value);
+    return out;
+  }, {});
 }
 
-function mapPopulatedBodyToPayload(body: any, propName?: string): Payload {
+function mapValueToSchema(body: any, propName?: string): JSONSchema7 {
   if (isPrimitive(body)) {
-    return (identifyType(body, propName)?.type as Primitive) || getType(body);
+    const format = identifyType(body, propName)?.type || getType(body);
+
+    const payload: JSONSchema7 = {
+      type: typeof body as JSONSchema7TypeName,
+      format: format as string,
+    };
+
+    if (typeof body === "string") {
+      payload.minLength = body.length;
+      payload.maxLength = body.length;
+    }
+
+    return payload;
   }
 
   if (Array.isArray(body)) {
-    const types: string[] = [];
-    body.forEach((item) =>
-      types.push(mapPopulatedBodyToPayload(item, propName) as Primitive)
-    );
+    const arraySchemas: JSONSchema7[] = [];
+    body.forEach((item) => arraySchemas.push(mapValueToSchema(item, propName)));
 
-    return types as Payload;
+    return {
+      type: "array",
+      items: {
+        oneOf: arraySchemas,
+      },
+    };
   }
 
   if (typeof body === "object" && body !== null) {
-    const result: { [name: string]: Payload } = {};
+    const payload: JSONSchema7 = {
+      type: "object",
+      properties: {},
+      required: Object.keys(body),
+    };
+
     for (const key in body) {
-      if (Object.prototype.hasOwnProperty.call(body, key)) {
-        result[key] = mapPopulatedBodyToPayload(body[key], key);
+      if (
+        payload.properties &&
+        Object.prototype.hasOwnProperty.call(body, key)
+      ) {
+        payload.properties[key] = mapValueToSchema(body[key], key);
       }
     }
-    return result;
+
+    return payload;
   }
 
   throw new Error(`Unknown type ${typeof body}`);
