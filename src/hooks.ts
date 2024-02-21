@@ -167,6 +167,8 @@ function mapValueToSchema(body: any, propName?: string): JSONSchema7 {
       items: {
         oneOf: arraySchemas,
       },
+      minItems: arraySchemas.length,
+      maxItems: arraySchemas.length,
     };
   }
 

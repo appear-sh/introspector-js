@@ -66,6 +66,13 @@ export const CONTENT_TYPES: Record<string, ContentTypeParser> = {
     tags: ["number"] as const,
     base: "number",
     match: (input: unknown) => !isNaN(Number(input)),
+    schemaProps: (input: unknown) => {
+      const val = input as number;
+      return {
+        minimum: val,
+        maximum: val,
+      };
+    },
   },
   // BASE string
   booleanString: {
