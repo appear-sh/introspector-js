@@ -5,7 +5,7 @@ import * as jsEnv from "browser-or-node";
 import { type Operation } from "./";
 
 import { AppearConfig, InternalConfig } from "./config";
-import { getType, identifyType } from "./contentType";
+import { findType, getType } from "./contentType";
 
 import { JSONSchema7, JSONSchema7TypeName } from "json-schema";
 
@@ -146,17 +146,14 @@ function kvToSchema(values: [string, unknown][]): Record<string, JSONSchema7> {
 
 function mapValueToSchema(body: any, propName?: string): JSONSchema7 {
   if (isPrimitive(body)) {
-    const format = identifyType(body, propName)?.type || getType(body);
+    const identifiedType = findType(body, propName);
+    const format = identifiedType?.type || getType(body);
 
     const payload: JSONSchema7 = {
       type: typeof body as JSONSchema7TypeName,
       format: format as string,
+      ...identifiedType?.schemaProps,
     };
-
-    if (typeof body === "string") {
-      payload.minLength = body.length;
-      payload.maxLength = body.length;
-    }
 
     return payload;
   }

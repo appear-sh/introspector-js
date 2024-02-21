@@ -1,3 +1,5 @@
+import { JSONSchema7 } from "json-schema";
+
 // https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00#section-4.2.1
 type JSON_TYPES =
   | "null"
@@ -17,8 +19,17 @@ const tokenize = (input: string) => {
     .filter(Boolean);
 };
 
+interface ContentTypeParser {
+  tags: string[]; // to be used for identifying various categories - eg "id" in place as consts
+  aliases?: string[]; // known aliases of the type when we map from imports and other sources
+  base: JSON_TYPES;
+  match: (input: unknown) => boolean;
+  propMatch?: (propName: string) => boolean;
+  schemaProps?: (input: unknown) => Partial<JSONSchema7>;
+}
+
 // order matters, from concrete to abstract
-export const CONTENT_TYPES = {
+export const CONTENT_TYPES: Record<string, ContentTypeParser> = {
   // BASE undefined
   undefined: {
     tags: ["undefined", "empty"] as const,
@@ -191,6 +202,13 @@ export const CONTENT_TYPES = {
     tags: ["string"] as const,
     base: "string",
     match: (input: unknown) => typeof input === "string",
+    schemaProps: (input: unknown) => {
+      const str = input as string;
+      return {
+        minLength: str.length,
+        maxLength: str.length,
+      };
+    },
   },
   // id is a specific content type that can never match directly, only through propMatch as upgrade from string
   // it shows just as an id, but example is uuid as it's common value
@@ -202,16 +220,7 @@ export const CONTENT_TYPES = {
       return tokenize(propName).at(-1) === "id";
     },
   },
-} satisfies Record<
-  string,
-  {
-    tags: string[]; // to be used for identifying various categories - eg "id" in place as consts
-    aliases?: string[]; // known aliases of the type when we map from imports and other sources
-    base: JSON_TYPES;
-    match: (input: unknown) => boolean;
-    propMatch?: (propName: string) => boolean;
-  }
->;
+} satisfies Record<string, ContentTypeParser>;
 
 export const getType = (typeName: string) => {
   const name = typeName.toLowerCase();
@@ -232,7 +241,15 @@ export const getType = (typeName: string) => {
   return undefined;
 };
 
-const identifyTypeFromPropName = (base: JSON_TYPES, propName?: string) => {
+type FoundType = {
+  type: keyof typeof CONTENT_TYPES;
+  parser: ContentTypeParser;
+};
+
+const identifyTypeFromPropName = (
+  base: JSON_TYPES,
+  propName?: string
+): FoundType | undefined => {
   if (!propName) return undefined;
 
   // optional detection from prop name
@@ -248,11 +265,14 @@ const identifyTypeFromPropName = (base: JSON_TYPES, propName?: string) => {
 
   return {
     type: propMatch[0] as keyof typeof CONTENT_TYPES,
-    ...propMatch[1],
+    parser: propMatch[1],
   };
 };
 
-export const identifyType = (input: unknown, propName?: string) => {
+const identifyType = (
+  input: unknown,
+  propName?: string
+): FoundType | undefined => {
   const match = Object.entries(CONTENT_TYPES).find(([type, details]) =>
     details.match(input)
   );
@@ -262,5 +282,35 @@ export const identifyType = (input: unknown, propName?: string) => {
     const propMatch = identifyTypeFromPropName(match[1].base, propName);
     if (propMatch) return propMatch;
   }
-  return { type: match[0] as keyof typeof CONTENT_TYPES, ...match[1] };
+  return { type: match[0] as keyof typeof CONTENT_TYPES, parser: match[1] };
+};
+
+type IdentifiedType = FoundType & {
+  schemaProps: Partial<JSONSchema7>;
+};
+
+export const findType = (
+  input: unknown,
+  propName?: string
+): IdentifiedType | undefined => {
+  const match = identifyType(input, propName);
+  if (!match) return undefined;
+
+  const identified: IdentifiedType = { ...match, schemaProps: {} };
+
+  // Fetch json-schema props for our base type first.
+  if (CONTENT_TYPES[match.parser.base]?.schemaProps) {
+    identified.schemaProps =
+      CONTENT_TYPES[match.parser.base]?.schemaProps?.(input) ?? {};
+  }
+
+  // Then merge any narrower ones in.
+  if (match.parser.schemaProps) {
+    identified.schemaProps = {
+      ...identified.schemaProps,
+      ...match.parser.schemaProps(input),
+    };
+  }
+
+  return identified;
 };
