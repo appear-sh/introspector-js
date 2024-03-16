@@ -1,11 +1,46 @@
 import { BatchInterceptor, Interceptor } from "@mswjs/interceptors";
 import { FetchInterceptor } from "@mswjs/interceptors/fetch";
 import * as jsEnv from "browser-or-node";
-
-import { type Payload, type Primitive, type Operation } from "./";
-
+import { type Operation } from "./";
 import { AppearConfig, InternalConfig } from "./config";
-import { identifyType } from "./contentType";
+import { schemaFromValue } from "./contentTypes/contentTypes";
+import { isNonNullable } from "./helpers";
+
+const getBodySchema = async (input: Request | Response) => {
+  const clone = input.clone();
+  if (!clone.body) return null;
+
+  const contentMediaType = clone.headers
+    .get("content-type")
+    ?.toLowerCase()
+    ?.split(";")[0]
+    ?.trim();
+
+  if (/application\/(?:.*\+)?json/.test(contentMediaType ?? "")) {
+    // application/json;
+    // application/something+json;
+    // application/vnd.something-other+json;
+    const contentSchema = schemaFromValue(await clone.json(), "in:body");
+    if (!contentSchema) return null;
+    return {
+      type: "string" as const,
+      contentSchema,
+      contentMediaType: contentMediaType!,
+    };
+  } else if (/application\/(?:.*\+)?xml/.test(contentMediaType ?? "")) {
+    // application/xml;
+    // application/something+xml;
+    // application/vnd.something-other+xml;
+    // todo add xml parsing
+    return { type: "string" as const, contentMediaType: contentMediaType! };
+  } else if (contentMediaType?.includes("text/")) {
+    return { type: "string" as const, contentMediaType: contentMediaType! };
+  }
+  // todo add other types
+
+  // unknown type
+  return null;
+};
 
 export async function hook(
   config: AppearConfig,
@@ -67,98 +102,45 @@ export async function hook(
 
     const url = clonedRequest.url;
 
-    let requestBody = clonedRequest.body;
-    let responseBody = clonedResponse.body;
+    const requestBody = await getBodySchema(clonedRequest);
+    const responseBody = await getBodySchema(clonedResponse);
 
-    if (
-      clonedRequest.headers.get("content-type")?.includes("application/json")
-    ) {
-      requestBody = await clonedRequest.json();
-    }
+    const requestHeadersSchemaEntries = [...clonedRequest.headers.entries()]
+      .map(([name, value]) => {
+        const schema = schemaFromValue(value, "in:headers");
+        return schema ? [name, schema] : undefined;
+      })
+      .filter(isNonNullable);
 
-    if (
-      clonedResponse.headers.get("content-type")?.includes("application/json")
-    ) {
-      responseBody = await clonedResponse.json();
-    } else {
-      // Ignore anything that isn't a JSON payload response right now.
-      return;
-    }
+    const responseHeadersSchemaEntries = [...clonedResponse.headers.entries()]
+      .map(([name, value]) => {
+        const schema = schemaFromValue(value, "in:headers");
+        return schema ? [name, schema] : undefined;
+      })
+      .filter(isNonNullable);
 
-    const sanitisedRequestBody = mapPopulatedBodyToPayload(requestBody);
-    const sanitisedResponseBody = mapPopulatedBodyToPayload(responseBody);
-
-    const sanitisedRequestHeaders = [...clonedRequest.headers.entries()].map(
-      ([name, value]) =>
-        [name, identifyType(value, name)?.type ?? "string"] as const
-    );
-
-    const sanitisedResponseHeaders = [...clonedResponse.headers.entries()].map(
-      ([name, value]) =>
-        [name, identifyType(value, name)?.type ?? "string"] as const
-    );
-
-    const query = [
-      ...new URL(url, "http://localhost").searchParams.entries(),
-    ].map(
-      ([key, value]) =>
-        [key, identifyType(value, key)?.type ?? "string"] as const
-    );
+    const query = [...new URL(url, "http://localhost").searchParams.entries()]
+      .map(([name, value]) => {
+        const schema = schemaFromValue(value, "in:query");
+        return schema ? [name, schema] : undefined;
+      })
+      .filter(isNonNullable);
 
     const operation: Operation = {
       request: {
         method: clonedRequest.method,
         uri: url,
-        headers: sanitisedRequestHeaders,
-        query: query,
-        body: sanitisedRequestBody,
-        bodyType: clonedRequest.headers.get("content-type"),
+        headers: Object.fromEntries(requestHeadersSchemaEntries),
+        query: Object.fromEntries(query),
+        body: requestBody,
       },
       response: {
-        headers: sanitisedResponseHeaders,
-        body: sanitisedResponseBody,
+        headers: Object.fromEntries(responseHeadersSchemaEntries),
         statusCode: clonedResponse.status,
-        bodyType: clonedResponse.headers.get("content-type"),
+        body: responseBody,
       },
     };
 
     captureOperation(operation);
   });
-}
-
-function isPrimitive(value: any): value is Primitive {
-  const validPrimitives = ["string", "number", "boolean", "undefined", "null"];
-  return validPrimitives.includes(typeof value) || value === null;
-}
-
-function getType(value: any): Primitive {
-  if (value === null) return "null";
-  return typeof value as Primitive;
-}
-
-function mapPopulatedBodyToPayload(body: any, propName?: string): Payload {
-  if (isPrimitive(body)) {
-    return (identifyType(body, propName)?.type as Primitive) || getType(body);
-  }
-
-  if (Array.isArray(body)) {
-    const types: string[] = [];
-    body.forEach((item) =>
-      types.push(mapPopulatedBodyToPayload(item, propName) as Primitive)
-    );
-
-    return types as Payload;
-  }
-
-  if (typeof body === "object" && body !== null) {
-    const result: { [name: string]: Payload } = {};
-    for (const key in body) {
-      if (Object.prototype.hasOwnProperty.call(body, key)) {
-        result[key] = mapPopulatedBodyToPayload(body[key], key);
-      }
-    }
-    return result;
-  }
-
-  throw new Error(`Unknown type ${typeof body}`);
 }

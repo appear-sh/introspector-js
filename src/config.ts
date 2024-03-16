@@ -4,6 +4,7 @@ import { INTROSPECTOR_VERSION } from "./version";
 
 export interface AppearConfig {
   apiKey: string;
+  environment: string;
 
   sendImmediately?: boolean;
   disableXHRHook?: boolean;

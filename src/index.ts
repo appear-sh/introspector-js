@@ -1,34 +1,43 @@
-import { type AppearConfig, gatherConfig } from "./config";
-import { CONTENT_TYPES } from "./contentType";
+import { gatherConfig, type AppearConfig } from "./config";
+import {
+  SomeSchemaType,
+  StringSchemaType,
+} from "./contentTypes/jsonSchema.types";
 import { hook } from "./hooks";
-
-export type Primitive = keyof typeof CONTENT_TYPES;
-
-export type Payload = Primitive | Payload[] | { [name: string]: Payload };
-
-export type AppearReporter = {
-  [key: string]: string;
-};
 
 export type Operation = {
   request: {
+    origin?: string;
     method: string;
     uri: string;
-    headers: (readonly [string, Primitive])[];
-    query: (readonly [string, Primitive])[];
-    body: Payload;
-    bodyType: string | null;
+    headers: Record<string, StringSchemaType>;
+    query: Record<string, SomeSchemaType>;
+    body: null | {
+      type?: "string";
+      // https://json-schema.org/draft/2020-12/json-schema-validation#name-contentschema
+      contentSchema?: SomeSchemaType;
+      // https://json-schema.org/draft/2020-12/json-schema-validation#name-contentmediatype
+      contentMediaType: string;
+    };
   };
   response: {
-    headers: (readonly [string, Primitive])[];
-    body: Payload;
-    bodyType: string | null;
     statusCode: number;
+    headers: Record<string, StringSchemaType>;
+    body: null | {
+      type?: "string";
+      // https://json-schema.org/draft/2020-12/json-schema-validation#name-contentschema
+      contentSchema?: SomeSchemaType;
+      // https://json-schema.org/draft/2020-12/json-schema-validation#name-contentmediatype
+      contentMediaType: string;
+    };
   };
 };
 
 export type Report = {
-  reporter: AppearReporter;
+  reporter: {
+    // meta info about the reporter
+    environment: string;
+  };
   operations: Operation[];
 };
 
@@ -38,10 +47,7 @@ interface AppearIntrospector {
   stop: () => void;
 }
 
-export async function init(
-  config: AppearConfig,
-  reporter?: AppearReporter
-): Promise<AppearIntrospector> {
+export async function init(config: AppearConfig): Promise<AppearIntrospector> {
   const internalConfig = gatherConfig();
 
   async function captureOperation(operation: Operation) {
@@ -52,19 +58,6 @@ export async function init(
   }
 
   await hook(config, internalConfig, captureOperation);
-
-  if (!reporter?.name) {
-    if (!internalConfig.serviceName) {
-      throw new Error(
-        "A service name for Appear must be configured. Please see documentation."
-      );
-    }
-
-    reporter = {
-      ...(reporter ?? {}),
-      name: internalConfig.serviceName,
-    };
-  }
 
   let currentTimeout: NodeJS.Timeout | null = null;
 
@@ -85,7 +78,7 @@ export async function init(
 
     try {
       const report: Report = {
-        reporter: reporter ?? {},
+        reporter: { environment: config.environment },
         operations: operationsToSend,
       };
 
