@@ -33,7 +33,7 @@ function getPackageName(): string | null {
 }
 
 const DEFAULT_APPEAR_SERVER = "https://app.appear.sh";
-const DEFAULT_REPORTING_URL = "/api/reports";
+const DEFAULT_REPORTING_URL = "/api/v1/reports";
 
 export const gatherConfig = (): InternalConfig => {
   const APPEAR_SERVER = process.env["APPEAR_SERVER"] ?? DEFAULT_APPEAR_SERVER;
