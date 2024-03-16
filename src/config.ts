@@ -6,6 +6,7 @@ export interface AppearConfig {
   apiKey: string;
   environment: string;
 
+  enabled?: boolean;
   sendImmediately?: boolean;
   disableXHRHook?: boolean;
   sampleRate?: number;

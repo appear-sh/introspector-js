@@ -48,6 +48,9 @@ interface AppearIntrospector {
 }
 
 export async function init(config: AppearConfig): Promise<AppearIntrospector> {
+  // Short-circuit everything, do nothing.
+  if (config.enabled === false) return { stop: () => {} };
+
   const internalConfig = gatherConfig();
 
   async function captureOperation(operation: Operation) {
