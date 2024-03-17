@@ -46,7 +46,10 @@ export type Report = {
 }
 
 export const reporter = (config: AppearConfig) => {
-  const sendImmediately = config.reporting?.batchIntervalSeconds === 0
+  const sendImmediately =
+    config.reporting?.batchIntervalSeconds === 0 ||
+    config.reporting?.batchSize === 0
+
   const reportedOperationHashes: string[] = []
   let bufferedOperations: Operation[] = []
   let timer: NodeJS.Timeout | null = null
@@ -69,7 +72,12 @@ export const reporter = (config: AppearConfig) => {
     bufferedOperations.push(op)
     reportedOperationHashes.push(hash)
 
-    if (sendImmediately) return flush()
+    if (
+      sendImmediately ||
+      bufferedOperations.length > (config.reporting?.batchSize ?? 10)
+    ) {
+      return flush()
+    }
   }
   const flush = async () => {
     if (bufferedOperations.length === 0) return

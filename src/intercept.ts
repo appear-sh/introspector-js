@@ -51,14 +51,14 @@ const convertToOperation = async (
 
   const requestHeadersSchemaEntries = [...req.headers.entries()]
     .map(([name, value]) => {
-      const schema = schemaFromValue(value, "in:headers")
+      const schema = schemaFromValue(value, "in:header")
       return schema ? [name, schema] : undefined
     })
     .filter(isNonNullable)
 
   const responseHeadersSchemaEntries = [...req.headers.entries()]
     .map(([name, value]) => {
-      const schema = schemaFromValue(value, "in:headers")
+      const schema = schemaFromValue(value, "in:header")
       return schema ? [name, schema] : undefined
     })
     .filter(isNonNullable)
@@ -73,7 +73,7 @@ const convertToOperation = async (
   return {
     request: {
       method: req.method,
-      uri: req.url,
+      uri: req.url.split("?")[0]!, // remove query so we don't send raw values
       headers: Object.fromEntries(requestHeadersSchemaEntries),
       query: Object.fromEntries(query),
       body: requestBody,

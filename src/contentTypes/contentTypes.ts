@@ -42,7 +42,13 @@ export const CONTENT_TYPES = {
     tags: ["in:body", "in:query", "in:header"] as const,
     type: "number",
     schemaFromValue: (value) => {
-      if (isNaN(Number(value)) || Number.isInteger(Number(value))) return false
+      if (
+        typeof value !== "number" ||
+        isNaN(value) ||
+        Number.isInteger(value)
+      ) {
+        return false
+      }
 
       const asString = (value as number).toString()
       const numOfDecimalPlaces =
@@ -89,7 +95,7 @@ export const CONTENT_TYPES = {
     aliases: ["int"],
     type: "integer",
     schemaFromValue: (value) => {
-      if (isNaN(Number(value)) || !Number.isInteger(Number(value))) return false
+      if (typeof value !== "number" || !Number.isInteger(value)) return false
       const precision =
         10 ** (Math.floor(value as number).toString().length - 1)
 
@@ -370,6 +376,10 @@ export const CONTENT_TYPES = {
       const schemas = value
         .map((item) => schemaFromValue(item))
         .filter(isNonNullable)
+
+      if (schemas.length === 0) {
+        return { type: "array", minItems: value.length, maxItems: value.length }
+      }
 
       const merged = mergeSchemas(...schemas)
 
