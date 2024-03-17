@@ -406,7 +406,12 @@ export const CONTENT_TYPES = {
 
       return {
         type: "array",
-        items: merged.length === 1 ? merged[0]! : { anyOf: merged },
+        items:
+          merged.length === 0
+            ? undefined
+            : merged.length === 1
+              ? merged[0]!
+              : { anyOf: merged },
         minItems: hasMin
           ? Math.min(...schemas.map((s) => s.minItems!))
           : undefined,
