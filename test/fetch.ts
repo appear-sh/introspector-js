@@ -1,6 +1,6 @@
-import axios from "axios";
+import axios from "axios"
 
-import * as Appear from "../src/index";
+import * as Appear from "../src/index"
 
 function doFetch() {
   return new Promise((resolve, reject) => {
@@ -28,8 +28,8 @@ function doFetch() {
     })
       .then((result) => result.json())
       .then(resolve)
-      .catch(reject);
-  });
+      .catch(reject)
+  })
 }
 
 function doAxiosNodeNative() {
@@ -53,24 +53,20 @@ function doAxiosNodeNative() {
       })
       .then((result) => result.data)
       .then(resolve)
-      .catch(reject);
-  });
+      .catch(reject)
+  })
 }
 
-(async () => {
-  await Appear.init(
-    {
-      apiKey: "example-testing-key",
-      sendImmediately: true,
-    },
-    {
-      name: "introspector-tests",
-    }
-  );
+;(async () => {
+  await Appear.init({
+    apiKey: "example-testing-key",
+    environment: "test",
+    sendImmediately: true,
+  })
 
-  const fetchResult = await doFetch();
-  console.log("got result for fetch:", fetchResult);
+  const fetchResult = await doFetch()
+  console.log("got result for fetch:", fetchResult)
 
-  const nativeResult = await doAxiosNodeNative();
-  console.log("got result for axios/native:", nativeResult);
-})();
+  const nativeResult = await doAxiosNodeNative()
+  console.log("got result for axios/native:", nativeResult)
+})()

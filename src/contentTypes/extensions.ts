@@ -1229,4 +1229,4 @@ export const KNOWN_EXTENSIONS = [
   "movie",
   "smv",
   "ice",
-];
+]
