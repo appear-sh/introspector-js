@@ -7,7 +7,7 @@ import stableStringify from "fast-json-stable-stringify"
 import xxhash from "xxhashjs"
 import type { AppearConfig } from "./init"
 
-export const DEFAULT_REPORTING_ENDPOINT = "https://app.appear.sh/api/v1/reports"
+export const DEFAULT_REPORTING_ENDPOINT = "https://api.appear.sh/v1/reports"
 
 export type Operation = {
   request: {
@@ -56,7 +56,10 @@ export const reporter = (config: AppearConfig) => {
 
   const start = () => {
     if (!sendImmediately) {
-      timer = setInterval(flush, config.reporting?.batchIntervalSeconds ?? 5000)
+      timer = setInterval(
+        flush,
+        (config.reporting?.batchIntervalSeconds ?? 5) * 1000,
+      )
     }
   }
   const stop = async () => {
