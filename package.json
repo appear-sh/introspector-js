@@ -1,37 +1,45 @@
 {
   "name": "@appear-sh/introspector",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "description": "",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "export-version": "node -p \"'export const INTROSPECTOR_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
-    "prebuild": "npm run export-version",
+    "test": "vitest",
     "build": "tsc",
-    "prepublish": "npm run build"
+    "lint": "prettier .",
+    "lint:fix": "prettier --write .",
+    "prepublish": "pnpm run build"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/behapidev/introspector-js.git"
+    "url": "git+https://github.com/appear-sh/introspector-js.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/behapidev/introspector-js/issues"
+    "url": "https://github.com/appear-sh/introspector-js/issues"
   },
-  "homepage": "https://github.com/behapidev/introspector-js#readme",
+  "homepage": "https://github.com/appear-sh/introspector-js#readme",
   "devDependencies": {
     "@types/express": "^4.17.21",
-    "@types/node": "^20.8.10",
-    "axios": "^1.6.2",
+    "@types/lodash": "^4.17.0",
+    "@types/node": "^20.11.28",
+    "@types/xxhashjs": "^0.2.4",
+    "axios": "^1.6.8",
     "body-parser": "^1.20.2",
-    "express": "^4.18.2",
-    "typescript": "^5.3.3"
+    "express": "^4.18.3",
+    "msw": "^2.2.4",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.2",
+    "vitest": "^1.4.0"
   },
   "dependencies": {
-    "@mswjs/interceptors": "^0.25.12",
-    "browser-or-node": "3.0.0-pre.0"
+    "@mswjs/interceptors": "^0.26.8",
+    "browser-or-node": "3.0.0-pre.0",
+    "fast-json-stable-stringify": "^2.1.0",
+    "lodash": "^4.17.21",
+    "xxhashjs": "^0.2.2"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
