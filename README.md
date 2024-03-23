@@ -81,6 +81,16 @@ export interface AppearConfig {
      * @default false
      */
     disableXHR?: boolean
+    /**
+     * Optional function that allows to filter what request/response pair is getting analyzed and reported
+     *
+     * @default (req, req, config) => req.destination === "" && request.url !== config.reporting.endpoint
+     */
+    filter?: (
+      request: Request,
+      response: Response,
+      config: ResolvedAppearConfig,
+    ) => boolean
   }
 }
 ```
