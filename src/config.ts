@@ -1,38 +1,6 @@
-# Appear JS introspector
+import { defaultInterceptFilter } from "./intercept"
+import { DEFAULT_REPORTING_ENDPOINT } from "./report"
 
-**Unlock the full potential of your existing APIs.**
-[appear.io](https://www.appear.sh/)
-
-Appear is a API development platform that helps companies understand, improve and manage their internal APIs.
-
-This JS introspector is a tool that listens to both incoming and outgoing traffic in JS runtime (browser, node) and detects the shape (schema) of it and reports this schema to Appear platform where it's further merged, processed and analyzed.
-
-Because it reports only schema of the traffic it never sends any actual content of the data nor PII.
-
-## Usage
-
-1. Install using your favourite package manager
-   ```sh
-   npm i @appear-sh/introspector-js
-   yarn add @appear-sh/introspector-js
-   pnpm add @appear-sh/introspector-js
-   ```
-2. In entrypoint of your service initialise the introspector
-   ```ts
-   Appear.init({
-     // you can obtain your reporting key in keys section in Appear settings
-     // reporting keys have only the permission to report schema and can't read any data, so are safe to be sent to browser.
-     apiKey: "your-api-key",
-     // environment can be any string that identifies environment data are reported from.
-     // Often used as "production" or "staging", however if you're using some form of ephemeral farm feel free to use it's identifier
-     environment: process.env.NODE_ENV,
-   })
-   ```
-3. you're done, now you can login into [app.appear.sh](https://app.appear.sh) and see what's being reported
-
-### Configuration
-
-```ts
 export interface AppearConfig {
   /** API key used for reporting */
   apiKey: string
@@ -93,4 +61,29 @@ export interface AppearConfig {
     ) => boolean
   }
 }
-```
+
+export type ResolvedAppearConfig = Omit<
+  Required<AppearConfig>,
+  "reporting" | "interception"
+> & {
+  reporting: NonNullable<Required<AppearConfig["reporting"]>>
+  interception: NonNullable<Required<AppearConfig["interception"]>>
+}
+
+export function resolveConfig(input: AppearConfig): ResolvedAppearConfig {
+  return {
+    enabled: true,
+    ...input,
+    interception: {
+      disableXHR: false,
+      filter: defaultInterceptFilter,
+      ...input["interception"],
+    },
+    reporting: {
+      batchIntervalSeconds: 5,
+      batchSize: 10,
+      endpoint: DEFAULT_REPORTING_ENDPOINT,
+      ...input["reporting"],
+    },
+  }
+}

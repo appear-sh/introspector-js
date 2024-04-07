@@ -5,7 +5,7 @@ import {
 import packageJson from "../package.json"
 import stableStringify from "fast-json-stable-stringify"
 import xxhash from "xxhashjs"
-import type { AppearConfig } from "./init"
+import type { ResolvedAppearConfig } from "./config"
 
 export const DEFAULT_REPORTING_ENDPOINT = "https://api.appear.sh/v1/reports"
 
@@ -45,7 +45,7 @@ export type Report = {
   operations: Operation[]
 }
 
-export const reporter = (config: AppearConfig) => {
+export const reporter = (config: ResolvedAppearConfig) => {
   const sendImmediately =
     config.reporting?.batchIntervalSeconds === 0 ||
     config.reporting?.batchSize === 0

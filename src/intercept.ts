@@ -1,10 +1,24 @@
 import { BatchInterceptor, Interceptor } from "@mswjs/interceptors"
 import { FetchInterceptor } from "@mswjs/interceptors/fetch"
 import * as jsEnv from "browser-or-node"
+import { ResolvedAppearConfig } from "./config"
 import { schemaFromValue } from "./contentTypes/contentTypes"
 import { isNonNullable } from "./helpers"
 import { DEFAULT_REPORTING_ENDPOINT, Operation } from "./report"
-import type { AppearConfig } from "./init"
+
+export const defaultInterceptFilter = (
+  request: Request,
+  response: Response,
+  config: ResolvedAppearConfig,
+): boolean => {
+  // Fetch & XHR don't have set destination
+  // Probably something we don't care about, ignore.
+  if (request.destination !== "") return false
+  // ignore reports to Appear
+  if (request.url === config.reporting.endpoint) return false
+
+  return true
+}
 
 const getBodySchema = async (input: Request | Response) => {
   const clone = input.clone()
@@ -87,7 +101,7 @@ const convertToOperation = async (
 }
 
 export async function intercept(
-  config: AppearConfig,
+  config: ResolvedAppearConfig,
   onOperation: (operation: Operation) => void,
 ) {
   const interceptors: Interceptor<any>[] = [new FetchInterceptor()]
@@ -129,16 +143,9 @@ export async function intercept(
       requests.delete(requestId)
     }
 
-    // Ignore our own outbound requests.
-    if (
-      request.url === (config.reporting?.endpoint ?? DEFAULT_REPORTING_ENDPOINT)
-    ) {
+    if (!config.interception.filter(request, response, config)) {
       return
     }
-
-    // Fetch & XHR don't have set destination
-    // Probably something we don't care about, ignore.
-    if (request.destination !== "") return
 
     const operation = await convertToOperation(request, response)
     onOperation(operation)
