@@ -13,9 +13,9 @@ Because it reports only schema of the traffic it never sends any actual content 
 
 1. Install using your favourite package manager
    ```sh
-   npm i @appear-sh/introspector-js
-   yarn add @appear-sh/introspector-js
-   pnpm add @appear-sh/introspector-js
+   npm i @appear.sh/introspector
+   yarn add @appear.sh/introspector
+   pnpm add @appear.sh/introspector
    ```
 2. In entrypoint of your service initialise the introspector
    ```ts
