@@ -1,5 +1,5 @@
 {
-  "name": "@appear-sh/introspector",
+  "name": "@appear.sh/introspector",
   "version": "0.3.0",
   "description": "",
   "main": "lib/index.js",
