@@ -40,8 +40,5 @@
     "fast-json-stable-stringify": "^2.1.0",
     "lodash": "^4.17.21",
     "xxhashjs": "^0.2.2"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
   }
 }
