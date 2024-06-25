@@ -1,7 +1,6 @@
 # Appear JS introspector
 
-**Unlock the full potential of your existing APIs.**
-[appear.io](https://www.appear.sh/)
+**Unlock the full potential of your existing APIs @ [Appear.sh](https://www.appear.sh/)**
 
 Appear is a API development platform that helps companies understand, improve and manage their internal APIs.
 
