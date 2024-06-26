@@ -1,0 +1,15 @@
+{
+  "name": "api",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "@appear.sh/introspector": "*",
+    "@redwoodjs/api": "7.7.1",
+    "@redwoodjs/graphql-server": "7.7.1"
+  },
+  "workspaces": {
+    "packages": [
+      "../../../"
+    ]
+  }
+}
