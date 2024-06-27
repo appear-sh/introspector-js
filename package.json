@@ -1,6 +1,6 @@
 {
   "name": "@appear.sh/introspector",
-  "version": "0.0.3-canary.redwood.0",
+  "version": "0.0.3-canary.redwood.1",
   "description": "",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -9,7 +9,7 @@
     "build": "tsc",
     "lint": "prettier .",
     "lint:fix": "prettier --write .",
-    "prepublish": "pnpm run build"
+    "prepublish": "rm -rf ./lib && pnpm run build"
   },
   "repository": {
     "type": "git",
