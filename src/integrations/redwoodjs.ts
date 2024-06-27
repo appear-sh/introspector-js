@@ -22,7 +22,7 @@ export function createVercelMiddleware(config: AppearConfig) {
         const req = new Request(new URL(event.path, `${protocol}://${host}`), {
           method: event.httpMethod,
           headers: new Headers(event.headers),
-          body: event.body, // todo what if isBase64Encoded?
+          body: event.body || null, // todo what if isBase64Encoded?
         })
         const res = new Response(result.body, {
           status: result.statusCode,
