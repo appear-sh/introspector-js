@@ -1,0 +1,4 @@
+{
+  "main": "../lib/integrations/redwoodjs.js",
+  "types": "../lib/integrations/redwoodjs.d.ts"
+}

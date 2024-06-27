@@ -8,6 +8,9 @@ dependencies:
   '@mswjs/interceptors':
     specifier: ^0.30.0
     version: 0.30.0
+  '@vercel/functions':
+    specifier: ^1.0.2
+    version: 1.0.2
   browser-or-node:
     specifier: 3.0.0
     version: 3.0.0
@@ -610,6 +613,11 @@ packages:
     dependencies:
       '@types/node': 20.14.8
     dev: true
+
+  /@vercel/functions@1.0.2:
+    resolution: {integrity: sha512-j3udyHOv/05Y8o3WQ/ANMWa1aYagsY5B3ouImiwgYsz5z4CBUHTY5dk74oQAXYr+bgoVDpdDlmxkpnxGzKEdLQ==}
+    engines: {node: '>= 16'}
+    dev: false
 
   /@vitest/expect@1.6.0:
     resolution: {integrity: sha512-ixEvFVQjycy/oNgHjqsL6AZCDduC+tflRluaHIzKIsdbzkLn2U/iBnVeJwB6HsIjQBdfMR8Z0tRxKUsvFJEeWQ==}
