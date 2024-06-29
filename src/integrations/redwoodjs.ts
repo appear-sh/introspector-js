@@ -22,17 +22,13 @@ export function createVercelMiddleware(config: AppearConfig) {
         const req = new Request(new URL(event.path, `${protocol}://${host}`), {
           method: event.httpMethod,
           headers: new Headers(event.headers),
-          body: event.body || null, // todo what if isBase64Encoded?
+          body: event.body || null, // if it's base64 encoded it'll be ingored by process anyways so we don't need to decode it here
         })
         const res = new Response(result.body, {
           status: result.statusCode,
           headers: new Headers(result.headers),
         })
-
-        console.log({ event, req, res })
         const operation = await process(req, res, resolvedConfig)
-
-        console.log("Operation", JSON.stringify(operation, null, 2))
 
         // report, don't await so we don't slow down response time
         waitUntil(report.report(operation))
