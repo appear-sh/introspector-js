@@ -1,6 +1,6 @@
 {
   "name": "@appear.sh/introspector",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -9,7 +9,7 @@
     "build": "tsc",
     "lint": "prettier .",
     "lint:fix": "prettier --write .",
-    "prepublish": "pnpm run build"
+    "prepublish": "rm -rf ./lib && pnpm run build --build --force"
   },
   "repository": {
     "type": "git",
@@ -22,21 +22,23 @@
   },
   "homepage": "https://github.com/appear-sh/introspector-js#readme",
   "devDependencies": {
+    "@types/aws-lambda": "^8.10.140",
     "@types/express": "^4.17.21",
-    "@types/lodash": "^4.17.0",
-    "@types/node": "^20.11.28",
+    "@types/lodash": "^4.17.6",
+    "@types/node": "^20.14.9",
     "@types/xxhashjs": "^0.2.4",
-    "axios": "^1.6.8",
+    "axios": "^1.7.2",
     "body-parser": "^1.20.2",
-    "express": "^4.18.3",
-    "msw": "^2.2.4",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.2",
-    "vitest": "^1.4.0"
+    "express": "^4.19.2",
+    "msw": "^2.3.1",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.2",
+    "vitest": "^1.6.0"
   },
   "dependencies": {
-    "@mswjs/interceptors": "^0.26.8",
-    "browser-or-node": "3.0.0-pre.0",
+    "@mswjs/interceptors": "^0.30.0",
+    "@vercel/functions": "^1.0.2",
+    "browser-or-node": "3.0.0",
     "fast-json-stable-stringify": "^2.1.0",
     "lodash": "^4.17.21",
     "xxhashjs": "^0.2.2"
