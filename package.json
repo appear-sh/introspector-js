@@ -1,6 +1,6 @@
 {
   "name": "@appear.sh/introspector",
-  "version": "0.0.3-canary.redwood.4",
+  "version": "0.0.4",
   "description": "",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
