@@ -96,11 +96,11 @@ export interface AppearConfig {
 
 ### Framework specific integrations
 
-Not all services are deployed as a node applications. If it's your case you can either use one of pre-built integrations or write your own adapter
+Not all services are deployed as a node applications. If that applies to you, you can either use one of pre-built integrations, or write your own adapter.
 
 #### RedwoodJS at vercel
 
-1. Create a file, anywhere in backend side that suits in your structure, for example `api/src/withAppear.ts`
+1. Create a file where you can instantiate Appear, for example: `api/src/withAppear.ts`
 
 ```ts
 // withAppear.ts
@@ -116,7 +116,7 @@ export const withAppear = createVercelMiddleware({
 })
 ```
 
-2. wrap your Serverless Functions (API Endpoints) in `withAppear`
+2. Wrap your Serverless Functions (API Endpoints) in `withAppear`
 
 ```ts
 // eg. api/src/functions/<function name>/<function name>.ts
@@ -127,4 +127,4 @@ export const handler = withAppear(async (event, context) => {
 })
 ```
 
-3. it's done, now you can try calls to your API and they'll appear in Appear
+3. Once finished, any calls to your APIs should show up in Appear
