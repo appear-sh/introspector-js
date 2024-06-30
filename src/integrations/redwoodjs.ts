@@ -1,8 +1,14 @@
-import type { Handler } from "aws-lambda"
 import { AppearConfig, resolveConfig } from "../config"
 import { reporter } from "../report"
 import { process } from "../process"
 import { waitUntil } from "@vercel/functions"
+
+// Serverless function handler, type copied from aws-lambda
+type Handler<TEvent = any, TResult = any> = (
+  event: TEvent,
+  context: object,
+  callback?: (error?: Error | string | null, result?: TResult) => void,
+) => void | Promise<TResult>
 
 export function createVercelMiddleware(config: AppearConfig) {
   const resolvedConfig = resolveConfig(config)
