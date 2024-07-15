@@ -25,10 +25,15 @@ export function createVercelMiddleware(config: AppearConfig) {
         const protocol = event.headers["x-forwarded-proto"] || "http"
         const host =
           event.headers["x-forwarded-host"] || event.headers.host || "unknown"
+
+        const body = event.isBase64Encoded
+          ? Buffer.from(event.body, "base64").toString("utf-8")
+          : event.body
+
         const req = new Request(new URL(event.path, `${protocol}://${host}`), {
           method: event.httpMethod,
           headers: new Headers(event.headers),
-          body: event.body || null, // if it's base64 encoded it'll be ingored by process anyways so we don't need to decode it here
+          body,
         })
         const res = new Response(result.body, {
           status: result.statusCode,
