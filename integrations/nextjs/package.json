@@ -1,0 +1,4 @@
+{
+  "main": "../../lib/integrations/nextjs.js",
+  "types": "../../lib/integrations/nextjs.d.ts"
+}
