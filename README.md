@@ -128,3 +128,54 @@ export const handler = withAppear(async (event, context) => {
 ```
 
 3. Once finished, any calls to your APIs should show up in Appear
+
+#### Next.JS server-side integration at vercel
+
+**Note:**
+
+only pages router is supported at this moment. If you'd like app router support please let us know on support@appear.sh
+
+1. Create a file where you can instantiate Appear, for example: `api/src/withAppear.ts`
+
+```ts
+// withAppear.ts
+import { createVercelPagesMiddleware } from "@appear.sh/introspector/integrations/nextjs"
+
+export const withAppear = createVercelPagesMiddleware({
+  // api key you can obtain at https://app.appear.sh/settings
+  apiKey: "your-api-key",
+  // any identifier of enviroment you prefer, we recommend to at least separate production/staging/development. The more granular the better
+  environment: process.env.NODE_ENV,
+  // other config as you desire
+  // ...
+})
+```
+
+2. Wrap your API Routes in `withAppear`
+
+```ts
+// eg. src/pages/api/<route name>.ts
+import { withAppear } from "src/withAppear"
+
+export default withAppear(async (req, res) => {
+  // your code
+})
+```
+
+3. Patch webpack configuration in `next.config.js`
+
+```js
+// @ts-check
+const {
+  withAppearConfig,
+} = require("@appear.sh/introspector/integrations/nextjs")
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // your next config
+}
+
+module.exports = withAppearConfig(nextConfig)
+```
+
+4. Once finished, any calls to your APIs should show up in Appear
