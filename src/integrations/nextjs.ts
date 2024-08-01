@@ -10,8 +10,29 @@ import type {
 } from "node:http"
 
 type Handler = (
-  req: IncomingMessage & { body: any },
-  res: ServerResponse,
+  req: IncomingMessage & {
+    query: Partial<{ [key: string]: string | string[] }>
+    cookies: Partial<{ [key: string]: string }>
+    body: any
+    env: { [key: string]: string | undefined }
+  },
+  res: ServerResponse & {
+    send: any
+    json: any
+    status: any
+    redirect(url: string): any
+    redirect(status: number, url: string): any
+    setDraftMode: (options: { enable: boolean }) => any
+    setPreviewData: (
+      data: object | string,
+      options?: { maxAge?: number; path?: string },
+    ) => any
+    clearPreviewData: (options?: { path?: string }) => any
+    revalidate: (
+      urlPath: string,
+      opts?: { unstable_onlyGenerated?: boolean },
+    ) => Promise<void>
+  },
 ) => void
 
 const normalizeHeaders = (
@@ -96,4 +117,24 @@ export function createVercelPagesMiddleware(config: AppearConfig) {
       }
       return result
     }
+}
+
+export function withAppearConfig(nextConfig: any /* Next Config */) {
+  return {
+    ...nextConfig,
+    webpack: (config: any, context: any) => {
+      // there are 3 environments in Next.js: server, client, and serverless with following mainFields
+      // and we want to remove ClientRequestInterceptor in nodejs environment
+      // server: [ 'main', 'module' ]
+      // client: [ 'browser', 'module', 'main' ]
+      // serverless: [ 'edge-light', 'worker', '...' ]
+
+      if (config.resolve.mainFields[0] !== "main") {
+        // browser & edge => ignore @mswjs/interceptors/ClientRequest
+        config.resolve.alias["@mswjs/interceptors/ClientRequest"] = false
+      }
+
+      return nextConfig.webpack ? nextConfig.webpack(config, context) : config
+    },
+  }
 }
