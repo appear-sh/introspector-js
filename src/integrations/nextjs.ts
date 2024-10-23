@@ -9,7 +9,7 @@ import type {
   ServerResponse,
 } from "node:http"
 
-type Handler = (
+type PagesApiRouteHandler = (
   req: IncomingMessage & {
     query: Partial<{ [key: string]: string | string[] }>
     cookies: Partial<{ [key: string]: string }>
@@ -34,6 +34,11 @@ type Handler = (
     ) => Promise<void>
   },
 ) => void
+
+type AppRouteHandler = (
+  req: Request,
+  params: unknown,
+) => Promise<Response> | Response
 
 const normalizeHeaders = (
   headers: IncomingHttpHeaders | OutgoingHttpHeaders,
@@ -87,7 +92,7 @@ export function createVercelPagesMiddleware(config: AppearConfig) {
   resolvedConfig.reporting.batchSize = 0 // disable batching because in lambda we need to send it straight away
   const report = reporter(resolvedConfig)
 
-  return (handler: Handler): Handler =>
+  return (handler: PagesApiRouteHandler): PagesApiRouteHandler =>
     async (req, baseRes) => {
       // create a proxy to capture the response body
       // we need to do this because the syntax is res.json({some: content})
@@ -116,6 +121,26 @@ export function createVercelPagesMiddleware(config: AppearConfig) {
         console.error("[Appear introspector] failed with error", e)
       }
       return result
+    }
+}
+
+export function createVercelRouteHandlerMiddleware(config: AppearConfig) {
+  const resolvedConfig = resolveConfig(config)
+  // add integration specific config
+  resolvedConfig.reporting.batchSize = 0 // disable batching because in lambda we need to send it straight away
+  const report = reporter(resolvedConfig)
+
+  return (handler: AppRouteHandler): AppRouteHandler =>
+    async (request, ...rest) => {
+      const response = await handler(request, ...rest)
+      try {
+        const operation = await process(request, response, resolvedConfig)
+        // report, don't await so we don't slow down response time
+        waitUntil(report.report(operation))
+      } catch (e) {
+        console.error("[Appear introspector] failed with error", e)
+      }
+      return response
     }
 }
 
