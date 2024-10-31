@@ -1,4 +1,12 @@
 import { IncomingMessage, ServerResponse } from "http"
+import { EventEmitter } from "events"
+
+import {
+  APPEAR_SYMBOL,
+  INTROSPECTOR_EMITTER_SYMBOL,
+  INTROSPECTOR_HOOKED_SYMBOL,
+} from "./hook/symbol"
+import { GlobalAppear } from "./global"
 
 export const isNonNullable = <T extends any>(
   value: T,
@@ -21,8 +29,8 @@ export async function readBodyFromRequest(
 
 export function readBodyFromResponse(res: ServerResponse): Promise<string> {
   return new Promise((resolve) => {
-    const originalWrite = res.write
-    const originalEnd = res.end
+    const originalWrite = res.write.bind(res)
+    const originalEnd = res.end.bind(res)
     const chunks: Buffer[] = []
 
     res.write = function (
@@ -74,28 +82,44 @@ export async function incomingMessageToRequest(
 export async function serverResponseToResponse(
   res: ServerResponse<IncomingMessage>,
 ): Promise<Response> {
-  const headers = new Headers()
-
-  res.getHeaderNames().forEach((headerName) => {
-    const headerValue = res.getHeader(headerName)
-    if (headerValue) {
-      if (typeof headerValue === "string" || Array.isArray(headerValue)) {
-        headers.append(
-          headerName,
-          Array.isArray(headerValue) ? headerValue.join(", ") : headerValue,
-        )
-      }
-    }
-  })
-
-  const status = res.statusCode || 200
-  const statusText = res.statusMessage || "OK"
-
+  // MUST read the body first, as headers etc are likely sent before this.
   const body = await readBodyFromResponse(res)
 
+  const headers = new Headers()
+  const outgoingHeaders = res.getHeaders()
+  for (const [headerName, headerValue] of Object.entries(outgoingHeaders)) {
+    if (headerValue) {
+      headers.append(
+        headerName,
+        Array.isArray(headerValue)
+          ? headerValue.join(", ")
+          : String(headerValue),
+      )
+    }
+  }
+
   return new Response(body, {
-    status,
-    statusText,
+    status: res.statusCode,
+    statusText: res.statusMessage,
     headers,
   })
+}
+
+// Typescript doesn't seem to support using symbols as
+// accessor keys for globalThis, so we need to cast to any.
+
+export function setGlobalAppear(emitter: EventEmitter) {
+  ;(globalThis as any)[APPEAR_SYMBOL] = {
+    [INTROSPECTOR_EMITTER_SYMBOL]: emitter,
+    [INTROSPECTOR_HOOKED_SYMBOL]: true,
+  }
+}
+
+export function getGlobalAppear(): GlobalAppear {
+  return (
+    (globalThis as any)[APPEAR_SYMBOL] ?? {
+      [INTROSPECTOR_EMITTER_SYMBOL]: new EventEmitter(),
+      [INTROSPECTOR_HOOKED_SYMBOL]: false,
+    }
+  )
 }

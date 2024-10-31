@@ -3,16 +3,15 @@ import { FetchInterceptor } from "@mswjs/interceptors/fetch"
 import * as jsEnv from "browser-or-node"
 import EventEmitter from "events"
 import { HttpInstrumentation } from "@opentelemetry/instrumentation-http"
-import { ClientRequest, IncomingMessage, ServerResponse } from "http"
+import { IncomingMessage, ServerResponse } from "http"
 import { NodeSDK } from "@opentelemetry/sdk-node"
 
 import { ResolvedAppearConfig } from "./config"
 import { process } from "./process"
 import { Operation } from "./report"
 import {
+  getGlobalAppear,
   incomingMessageToRequest,
-  readBodyFromRequest,
-  readBodyFromResponse,
   serverResponseToResponse,
 } from "./helpers"
 
@@ -61,12 +60,10 @@ export async function intercept(
   onOperation: (operation: Operation) => void,
 ) {
   const interceptors: Interceptor<any>[] = [new FetchInterceptor()]
-  const hasDoneInboundHook =
-    (globalThis as any)[INTROSPECTOR_HOOKED_SYMBOL] === true
 
-  const hookEmitter = hasDoneInboundHook
-    ? (globalThis as any)[INTROSPECTOR_EMITTER_SYMBOL]
-    : new EventEmitter()
+  const globalAppear = getGlobalAppear()
+  const hasDoneInboundHook = globalAppear[INTROSPECTOR_HOOKED_SYMBOL] == true
+  const hookEmitter = globalAppear[INTROSPECTOR_EMITTER_SYMBOL]
 
   if (jsEnv.isBrowser && !config.interception?.disableXHR) {
     const { XMLHttpRequestInterceptor } = await import(
@@ -128,14 +125,20 @@ export async function intercept(
         return
       }
 
-      const request = await incomingMessageToRequest(incomingResponse.req)
-      const response = await serverResponseToResponse(incomingResponse)
+      // This MUST be in a promise.all, as we need to hook both the
+      // request AND the response in the same tick, otherwise we'll miss
+      // the events on the body, and we'll end up hanging.
+      // TODO: We probably want to race this with a timeout eventually.
+      const [parsedRequest, parsedResponse] = await Promise.all([
+        incomingMessageToRequest(incomingResponse.req),
+        serverResponseToResponse(incomingResponse),
+      ])
 
-      if (!config.interception.filter(request, response, config)) {
+      if (!config.interception.filter(parsedRequest, parsedResponse, config)) {
         return
       }
 
-      const operation = await process(request, response, config)
+      const operation = await process(parsedRequest, parsedResponse, config)
       onOperation(operation)
     },
   )
