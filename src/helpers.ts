@@ -70,7 +70,12 @@ export async function incomingMessageToRequest(
   const url = `${protocol}://${host}${req.url}`
 
   const headers = new Headers(req.headers as Record<string, string>)
-  const body = await readBodyFromRequest(req)
+
+  let body = null
+
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    body = await readBodyFromRequest(req)
+  }
 
   return new Request(url, {
     method: req.method,
