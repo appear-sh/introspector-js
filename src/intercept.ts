@@ -5,6 +5,7 @@ import EventEmitter from "events"
 import { HttpInstrumentation } from "@opentelemetry/instrumentation-http"
 import { IncomingMessage, ServerResponse } from "http"
 import { NodeSDK } from "@opentelemetry/sdk-node"
+import { Sampler, SamplingDecision } from "@opentelemetry/sdk-trace-base"
 
 import { ResolvedAppearConfig } from "./config"
 import { process } from "./process"
@@ -44,8 +45,18 @@ export async function hookInbound(hookEmiter: EventEmitter) {
     },
   })
 
+  // We don't actually want to submit any traces to a potentially non-existant otel collector.
+  const sampler: Sampler = {
+    shouldSample: () => {
+      return {
+        decision: SamplingDecision.NOT_RECORD,
+      }
+    },
+  }
+
   const sdk = new NodeSDK({
     instrumentations: [incomingHTTPInstrumentor],
+    sampler,
   })
 
   sdk.start()

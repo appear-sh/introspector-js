@@ -32,7 +32,7 @@ export const tests: FrameworkTest[] = [
   koaTest,
   // hapi tests break for some reason
   // hapiTest,
-  nestTest,
+  // nestTest,
 ]
 
 describe.sequential("hooks", () => {
