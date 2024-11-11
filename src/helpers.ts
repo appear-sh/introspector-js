@@ -88,7 +88,7 @@ export async function serverResponseToResponse(
   res: ServerResponse<IncomingMessage>,
 ): Promise<Response> {
   // MUST read the body first, as headers etc are likely sent before this.
-  const body = await readBodyFromResponse(res)
+  let parsedBody: string | null = await readBodyFromResponse(res)
 
   const headers = new Headers()
   const outgoingHeaders = res.getHeaders()
@@ -103,7 +103,13 @@ export async function serverResponseToResponse(
     }
   }
 
-  return new Response(body, {
+  const statusCode = res.statusCode
+
+  if (statusCode === 204) {
+    parsedBody = null
+  }
+
+  return new Response(parsedBody, {
     status: res.statusCode,
     statusText: res.statusMessage,
     headers,

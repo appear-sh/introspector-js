@@ -6,7 +6,8 @@ import * as Appear from "../../src"
 import { expressTest } from "./frameworks/express"
 import { koaTest } from "./frameworks/koa"
 import { hapiTest } from "./frameworks/hapi"
-import { nestTest } from "./frameworks/nest"
+import { nestExpressTest } from "./frameworks/nest-express"
+import { nestFastifyTest } from "./frameworks/nest-fastify"
 
 export interface FrameworkStartedInfo {
   port: number
@@ -32,7 +33,8 @@ export const tests: FrameworkTest[] = [
   koaTest,
   // hapi tests break for some reason
   // hapiTest,
-  // nestTest,
+  nestExpressTest,
+  nestFastifyTest,
 ]
 
 describe.sequential("hooks", () => {
@@ -51,7 +53,7 @@ describe.sequential("hooks", () => {
       }
 
       function doTestsOnReq(
-        tests: (req: Request, res: Response) => Promise<void>,
+        tests: (req: Request, res: Response) => Promise<void | Promise<void>>,
         requestTester: (req: Request) => boolean,
         caller: () => Promise<void>,
       ) {

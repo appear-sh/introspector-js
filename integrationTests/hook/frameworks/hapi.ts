@@ -6,12 +6,6 @@ function init(): Promise<FrameworkStartedInfo> {
       const app = server({
         port: 0,
         host: "localhost",
-        routes: {
-          payload: {
-            parse: true,
-            allow: ["application/json"],
-          },
-        },
       })
 
       app.route({
@@ -34,8 +28,7 @@ function init(): Promise<FrameworkStartedInfo> {
         method: "POST",
         path: "/hapi-echo-response",
         handler: (request, h) => {
-          console.log("paylaod:", request)
-          return h.response(request.payload).code(200)
+          return request.payload
         },
       })
 
