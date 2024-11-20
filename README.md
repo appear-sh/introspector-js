@@ -27,7 +27,12 @@ Because it reports only schema of the traffic it never sends any actual content 
      environment: process.env.NODE_ENV,
    })
    ```
-3. you're done, now you can login into [app.appear.sh](https://app.appear.sh) and see what's being reported
+3. If your service hosts a HTTP server (such as Express, NestJS etc) sometimes you'll have to "hook" things before your application actually starts. To do this, we expose a `@appear.sh/introspector/hook` package that does this for you. The easiest way to use this is to modify your `node` executable parameters.
+
+Before: `node build/server.js`
+After: `node -r @appear.sh/introspector/hook build/server.js`
+
+4. you're done, now you can login into [app.appear.sh](https://app.appear.sh) and see what's being reported
 
 ### Configuration
 
