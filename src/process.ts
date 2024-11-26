@@ -18,12 +18,22 @@ const getBodySchema = async (input: Request | Response) => {
     // application/json;
     // application/something+json;
     // application/vnd.something-other+json;
-    const contentSchema = schemaFromValue(await clone.json(), "in:body")
-    if (!contentSchema) return null
-    return {
-      type: "string" as const,
-      contentSchema,
-      contentMediaType: contentMediaType!,
+
+    // We need to try/catch the `.json()` call because even though the
+    // content-type is application/json the body might not be valid json.
+    try {
+      const jsonBody = await clone.json()
+      const contentSchema = schemaFromValue(jsonBody, "in:body")
+      if (!contentSchema) return null
+      return {
+        type: "string" as const,
+        contentSchema,
+        contentMediaType: contentMediaType!,
+      }
+    } catch (e) {
+      // Ignore this request.
+      // TODO: Eventually log this as an error.
+      return null
     }
   } else if (/application\/(?:.*\+)?xml/.test(contentMediaType ?? "")) {
     // application/xml;

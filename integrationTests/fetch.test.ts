@@ -16,6 +16,7 @@ describe("integration: fetch", () => {
     HttpResponse.json({ success: false }, { status: 500 }),
   )
   const express = startExpress()
+  let port: number
   let testUrl: string
 
   beforeAll(async () => {
@@ -25,7 +26,8 @@ describe("integration: fetch", () => {
       environment: "test",
       reporting: { batchSize: 0 },
     })
-    const { port } = (await express).address() as AddressInfo
+    const addr = (await express).address() as AddressInfo
+    port = addr.port
     testUrl = `http://127.0.0.1:${port}/helloworld`
     msw.use(http.all(testUrl, () => passthrough()))
   })
@@ -227,6 +229,10 @@ describe("integration: fetch", () => {
       required: ["status"],
       type: "object",
     })
+  })
+
+  it("should ignore invalid json bodies", async () => {
+    await fetch(`http://127.0.0.1:${port}/invalid-json`)
   })
 
   it.todo("should should correctly report empty bodies")

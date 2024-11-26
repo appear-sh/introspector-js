@@ -14,6 +14,12 @@ export const startExpress = async (): Promise<Server> => {
     res.json({ status: "OK" })
   })
 
+  app.get("/invalid-json", (_, res) => {
+    // Set our content type to application/json, but send a non-json body.
+    res.set("Content-Type", "application/json")
+    return res.end("not json")
+  })
+
   return new Promise((resolve) => {
     const server = app.listen(0, () => resolve(server))
   })
