@@ -107,11 +107,12 @@ export async function intercept(
   interceptor.on("response", async ({ requestId, response }) => {
     const request = requests.get(requestId)
 
-    if (!request) {
-      throw new Error("Could not find corresponding request for response.")
-    } else {
-      requests.delete(requestId)
-    }
+    // If we don't have the request, we can't do anything.
+    // Usually this shouldn't happen, but in theory it could be in case of "response" event fired multiple times, in which case we can ignore it.
+    if (!request) return
+
+    // remove from requests in flight
+    requests.delete(requestId)
 
     if (!config.interception.filter(request, response, config)) {
       return
