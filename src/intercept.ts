@@ -1,10 +1,12 @@
+import type { IncomingMessage, ServerResponse } from "http"
+import EventEmitter from "events"
+import nodeProcess from "process"
+
 import { BatchInterceptor, Interceptor } from "@mswjs/interceptors"
 import { FetchInterceptor } from "@mswjs/interceptors/fetch"
 import * as jsEnv from "browser-or-node"
-import EventEmitter from "events"
+
 import { HttpInstrumentation } from "@opentelemetry/instrumentation-http"
-import { IncomingMessage, ServerResponse } from "http"
-import { NodeSDK } from "@opentelemetry/sdk-node"
 import { Sampler, SamplingDecision } from "@opentelemetry/sdk-trace-base"
 
 import { ResolvedAppearConfig } from "./config"
@@ -45,25 +47,45 @@ export async function hookInbound(hookEmiter: EventEmitter) {
     },
   })
 
-  // We don't actually want to submit any traces to a potentially non-existant otel collector.
-  const sampler: Sampler = {
-    shouldSample: () => {
-      return {
-        decision: SamplingDecision.NOT_RECORD,
-      }
-    },
+  if (
+    nodeProcess.env.NEXT_RUNTIME == "edge" ||
+    nodeProcess.env.NEXT_RUNTIME == "nodejs"
+  ) {
+    const { registerOTel } = await import("@vercel/otel")
+    return registerOTel({
+      instrumentations: [incomingHTTPInstrumentor],
+      traceSampler: "always_off",
+    })
+  } else {
+    // NextJS does a weird thing where it tries to staticly analyse this
+    // file, upfront, and then tries to compile @opentelemetry/sdk-node which
+    // doesn't work because some system packages aren't available.
+    // Pulling the package name out into a variable avoids this, but DOES mean
+    // that a warning of "the request of a dependency is an expression" gets logged.
+    // Unfortunate.
+    const otelPackageName = "@opentelemetry/sdk-node"
+    const { NodeSDK } = await import(otelPackageName)
+
+    // We don't actually want to submit any traces to a potentially non-existant otel collector.
+    const sampler: Sampler = {
+      shouldSample: () => {
+        return {
+          decision: SamplingDecision.NOT_RECORD,
+        }
+      },
+    }
+
+    const sdk = new NodeSDK({
+      instrumentations: [incomingHTTPInstrumentor],
+      sampler,
+    })
+
+    sdk.start()
+
+    hookEmiter.on("exit", () => {
+      sdk.shutdown()
+    })
   }
-
-  const sdk = new NodeSDK({
-    instrumentations: [incomingHTTPInstrumentor],
-    sampler,
-  })
-
-  sdk.start()
-
-  hookEmiter.on("exit", () => {
-    sdk.shutdown()
-  })
 }
 
 export async function intercept(
@@ -132,8 +154,10 @@ export async function intercept(
   hookEmitter.on(
     "response",
     async (incomingResponse: IncomingMessage | ServerResponse) => {
-      if (incomingResponse instanceof IncomingMessage) {
-        // Ignore.
+      // Check if the response is an instance of IncomingMessage.
+      // This is a workaround to prevent us from having to import the non-types
+      // of node:http, which won't work in some serverless/edge runtimes.
+      if (!("assignSocket" in incomingResponse)) {
         return
       }
 

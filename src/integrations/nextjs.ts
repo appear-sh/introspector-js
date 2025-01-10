@@ -8,6 +8,7 @@ import type {
   OutgoingHttpHeaders,
   ServerResponse,
 } from "node:http"
+import { NULL_BODY_RESPONSE_CODES } from "../helpers"
 
 type PagesApiRouteHandler = (
   req: IncomingMessage & {
@@ -71,10 +72,11 @@ const normalizeResponse = (
   body: object | string | Buffer | null | undefined,
 ) => {
   const responseHeaders = normalizeHeaders(res.getHeaders())
-  // 204 No Content, 304 Not Modified don't allow body https://nextjs.org/docs/messages/invalid-api-status-body
-  if (res.statusCode === 204 || res.statusCode === 304) {
+
+  if (NULL_BODY_RESPONSE_CODES.includes(res.statusCode)) {
     body = null
   }
+
   // Response accepts only string or Buffer and next supports objects
   if (body && typeof body === "object" && !Buffer.isBuffer(body)) {
     body = JSON.stringify(body)
