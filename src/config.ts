@@ -1,11 +1,14 @@
-import { defaultInterceptFilter } from "./intercept"
-import { DEFAULT_REPORTING_ENDPOINT } from "./report"
+import { defaultInterceptFilter } from "./helpers.js"
+import { DEFAULT_REPORTING_ENDPOINT } from "./report.js"
 
 export interface AppearConfig {
   /** API key used for reporting */
   apiKey: string
   /** environment where the report is sent from */
   environment: string
+
+  serviceName?: string
+
   /**
    * flag you can use to disable introspector completely
    * useful if you don't want to report in certain environments
@@ -64,8 +67,9 @@ export interface AppearConfig {
 
 export type ResolvedAppearConfig = Omit<
   Required<AppearConfig>,
-  "reporting" | "interception"
+  "reporting" | "interception" | "serviceName"
 > & {
+  serviceName?: string
   reporting: NonNullable<Required<AppearConfig["reporting"]>>
   interception: NonNullable<Required<AppearConfig["interception"]>>
 }

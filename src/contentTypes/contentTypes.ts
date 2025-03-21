@@ -9,10 +9,10 @@ import {
   SchemaOf,
   SomeSchemaType,
   StringSchemaType,
-} from "./jsonSchema.types"
-import { isEqual } from "lodash"
-import { isNonNullable } from "../helpers"
-import { KNOWN_EXTENSIONS } from "./extensions"
+} from "./jsonSchema.types.js"
+import isEqual from "lodash/isEqual.js"
+import { isNonNullable } from "../helpers.js"
+import { KNOWN_EXTENSIONS } from "./extensions.js"
 
 // order matters, from concrete to abstract
 export const CONTENT_TYPES = {

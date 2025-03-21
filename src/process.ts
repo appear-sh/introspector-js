@@ -1,8 +1,7 @@
-import { ResolvedAppearConfig } from "./config"
-import { schemaFromValue } from "./contentTypes/contentTypes"
-import { StringSchemaType } from "./contentTypes/jsonSchema.types"
-import { isNonNullable } from "./helpers"
-import { Operation } from "./report"
+import { schemaFromValue } from "./contentTypes/contentTypes.js"
+import { StringSchemaType } from "./contentTypes/jsonSchema.types.js"
+import { isNonNullable } from "./helpers.js"
+import { Operation } from "./report.js"
 
 const getBodySchema = async (input: Request | Response) => {
   const clone = input.clone()
@@ -50,15 +49,19 @@ const getBodySchema = async (input: Request | Response) => {
   return null
 }
 
-export const process = async (
-  req: Request,
-  res: Response,
-  config: ResolvedAppearConfig,
-): Promise<Operation> => {
-  const requestBody = await getBodySchema(req)
-  const responseBody = await getBodySchema(res)
+export const process = async ({
+  request,
+  response,
+  direction,
+}: {
+  request: Request
+  response: Response
+  direction: "incoming" | "outgoing"
+}): Promise<Operation> => {
+  const requestBody = await getBodySchema(request)
+  const responseBody = await getBodySchema(response)
 
-  const requestHeadersSchemaEntries = [...req.headers.entries()]
+  const requestHeadersSchemaEntries = [...request.headers.entries()]
     .map(([name, value]) => {
       const schema = schemaFromValue(value, "in:header") as
         | StringSchemaType
@@ -67,7 +70,7 @@ export const process = async (
     })
     .filter(isNonNullable)
 
-  const responseHeadersSchemaEntries = [...res.headers.entries()]
+  const responseHeadersSchemaEntries = [...response.headers.entries()]
     .map(([name, value]) => {
       const schema = schemaFromValue(value, "in:header") as
         | StringSchemaType
@@ -76,7 +79,9 @@ export const process = async (
     })
     .filter(isNonNullable)
 
-  const query = [...new URL(req.url, "http://localhost").searchParams.entries()]
+  const query = [
+    ...new URL(request.url, "http://localhost").searchParams.entries(),
+  ]
     .map(([name, value]) => {
       const schema = schemaFromValue(value, "in:query")
       return schema ? [name, schema] : undefined
@@ -84,16 +89,17 @@ export const process = async (
     .filter(isNonNullable)
 
   return {
+    direction,
     request: {
-      method: req.method,
-      uri: req.url.split("?")[0]!, // remove query so we don't send raw values
+      method: request.method,
+      uri: request.url.split("?")[0]!, // remove query so we don't send raw values
       headers: Object.fromEntries(requestHeadersSchemaEntries),
       query: Object.fromEntries(query),
       body: requestBody,
     },
     response: {
       headers: Object.fromEntries(responseHeadersSchemaEntries),
-      statusCode: res.status,
+      statusCode: response.status,
       body: responseBody,
     },
   }

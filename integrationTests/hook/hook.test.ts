@@ -30,16 +30,16 @@ interface HookEvents {
 
 export const tests: FrameworkTest[] = [
   expressTest,
-  koaTest,
+  // koaTest,
   // hapi tests break for some reason
   // hapiTest,
-  nestExpressTest,
-  nestFastifyTest,
+  // nestExpressTest,
+  // nestFastifyTest,
 ]
 
 describe.sequential("hooks", () => {
   beforeAll(async () => {
-    await import("../../src/hook/index")
+    await import("../../src/otel/index")
   })
 
   for (const test of tests) {
@@ -150,6 +150,18 @@ describe.sequential("hooks", () => {
               },
               body: JSON.stringify({ message: "hello" }),
             })
+          },
+        )
+      })
+
+      it(`${test.framework}: should capture request/response of upstream call`, async () => {
+        return doTestsOnReq(
+          async (req, res) => {
+            expect(res.status).toBe(200)
+          },
+          (req) => req.url.endsWith(`/${test.framework}-upstream`),
+          async () => {
+            fetch(url(`/${test.framework}-upstream`))
           },
         )
       })

@@ -18,6 +18,15 @@ function init(): Promise<FrameworkStartedInfo> {
         return res.json(req.body)
       })
 
+      app.get("/express-upstream", async (req, res) => {
+        const upstreamRes = await fetch("https://httpbin.org/anything", {
+          method: "POST",
+          body: JSON.stringify({ message: "hello" }),
+          headers: { "Content-Type": "application/json" },
+        })
+        return res.json(await upstreamRes.json())
+      })
+
       const listener = app.listen(0, () => {
         // @ts-ignore
         const port = listener.address()!.port

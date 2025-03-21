@@ -1,5 +1,5 @@
 import { describe, expect, it, test } from "vitest"
-import { getType, schemaFromValue, mergeSchemas } from "./contentTypes"
+import { getType, schemaFromValue, mergeSchemas } from "./contentTypes.js"
 
 describe("content type helpers", () => {
   describe("getType", () => {
