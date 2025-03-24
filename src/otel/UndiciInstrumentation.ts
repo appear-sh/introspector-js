@@ -13,7 +13,10 @@ export class UndiciInstrumentation extends OgUndiciInstrumentation {
   constructor(config: UndiciInstrumentationConfig & AppearConfig) {
     super({
       ...config,
-      responseHook: async (span, res) => this._responseHook(span, res),
+      responseHook: async (span, res) => {
+        this._responseHook(span, res)
+        config.responseHook?.(span, res)
+      },
     })
     this.appearConfig = resolveConfig(config)
   }
@@ -77,8 +80,6 @@ export class UndiciInstrumentation extends OgUndiciInstrumentation {
       } catch (e) {}
       return ogOnComplete.apply(handler, args)
     }
-
-    return this._config?.responseHook?.(span, undici)
   }
 
   protected undiciRequestToRequest(undiciRequest: UndiciRequest): Request {

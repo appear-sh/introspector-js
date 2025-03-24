@@ -38,6 +38,9 @@ export class AppearExporter implements SpanExporter {
       })
       .map((op) => JSON.parse(op as string))
 
+    if (operations.length === 0)
+      return resultCallback({ code: ExportResultCode.SUCCESS })
+
     const pendingExport = this.sendOperations(operations)
       .then(() => resultCallback({ code: ExportResultCode.SUCCESS }))
       .catch((error) =>

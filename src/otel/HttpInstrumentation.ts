@@ -17,8 +17,14 @@ export class HttpInstrumentation extends OgHttpInstrumentation {
   constructor(config: HttpInstrumentationConfig & AppearConfig) {
     super({
       ...config,
-      requestHook: (span, req) => this._requestHook(span, req),
-      responseHook: async (span, res) => this._responseHook(span, res),
+      requestHook: (span, req) => {
+        this._requestHook(span, req)
+        config.requestHook?.(span, req)
+      },
+      responseHook: async (span, res) => {
+        this._responseHook(span, res)
+        config.responseHook?.(span, res)
+      },
     })
     this.appearConfig = resolveConfig(config)
   }
@@ -33,8 +39,6 @@ export class HttpInstrumentation extends OgHttpInstrumentation {
     } else {
       readOutgoingMessageBody(req)
     }
-
-    return this._config?.requestHook?.(span, req)
   }
 
   protected async _responseHook(
@@ -79,8 +83,6 @@ export class HttpInstrumentation extends OgHttpInstrumentation {
     })
     span.setAttribute("appear.operation", JSON.stringify(operation))
     endSpan.apply(span, [spanEndTime])
-
-    return this._config?.responseHook?.(span, res)
   }
 }
 
