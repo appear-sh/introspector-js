@@ -1,12 +1,11 @@
+import moduleModule from "node:module"
 import { NodeSDK } from "@opentelemetry/sdk-node"
-import moduleModule from "module"
+import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base"
 import { AppearConfig } from "../config.js"
 import { AppearExporter } from "./AppearExporter.js"
 import { AppearInstrumentation } from "./AppearInstrumentation.js"
 
-export function registerAppear(
-  config: AppearConfig,
-) {
+export function registerAppear(config: AppearConfig) {
   if (config.enabled === false) return
 
   moduleModule.register(
@@ -16,14 +15,20 @@ export function registerAppear(
 
   const sdk = new NodeSDK({
     serviceName: config.serviceName,
-    traceExporter: new AppearExporter(config),
+    spanProcessors: [new BatchSpanProcessor(new AppearExporter(config))],
     instrumentations: [new AppearInstrumentation(config)],
   })
 
   sdk.start()
 
   // listen to shutdown signals and fire sdk.shutdown()
-  process.on("SIGTERM", () => sdk.shutdown())
+  process.on("beforeExit", async (exitCode) => {
+    await Promise.race([
+      sdk.shutdown(),
+      new Promise((resolve) => setTimeout(resolve, 5000)),
+    ])
+    process.exit(exitCode)
+  })
 
   return sdk
 }
