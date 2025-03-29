@@ -109,10 +109,16 @@ export class UndiciInstrumentation extends OgUndiciInstrumentation {
     const headers = new Headers()
     const headersArray = Array.isArray(input) ? input : input.split("\r\n")
     while (headersArray.length > 0) {
-      const header = headersArray.shift()
-      const value = headersArray.shift()
-      if (header && value !== undefined)
+      let header = headersArray.shift()?.toString()
+      let value
+      if (header?.includes(": ")) {
+        [header, value] = header.split(": ")
+      } else {
+        value = headersArray.shift()
+      }
+      if (header && value !== undefined) {
         headers.append(header.toString(), value.toString())
+      }
     }
 
     return headers
