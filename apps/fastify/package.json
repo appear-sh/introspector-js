@@ -1,0 +1,25 @@
+{
+  "name": "@appear.sh/fastify-test",
+  "version": "1.0.0-alpha.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "lint": "prettier .",
+    "lint:fix": "prettier --write ."
+  },
+  "dependencies": {
+    "@appear.sh/introspector": "workspace:*",
+    "@appear.sh/test-utils": "workspace:*",
+    "fastify": "^5.2.1",
+    "@fastify/formbody": "^8.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.11",
+    "prettier": "^3.5.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.9"
+  }
+}

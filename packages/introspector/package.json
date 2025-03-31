@@ -1,0 +1,60 @@
+{
+  "name": "@appear.sh/introspector",
+  "version": "1.0.0-alpha.0",
+  "description": "JavaScript introspection library",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "test": "vitest",
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "prettier .",
+    "lint:fix": "prettier --write .",
+    "prepublish": "pnpm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/appear-sh/introspector-js.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/appear-sh/introspector-js/issues"
+  },
+  "homepage": "https://github.com/appear-sh/introspector-js#readme",
+  "dependencies": {
+    "@mswjs/interceptors": "^0.38.0",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/api-logs": "^0.200.0",
+    "@opentelemetry/core": "^2.0.0",
+    "@opentelemetry/instrumentation": "^0.200.0",
+    "@opentelemetry/instrumentation-http": "^0.200.0",
+    "@opentelemetry/instrumentation-undici": "^0.11.0",
+    "@opentelemetry/sdk-node": "^0.200.0",
+    "@opentelemetry/sdk-trace-base": "^2.0.0",
+    "@opentelemetry/sdk-trace-node": "^2.0.0",
+    "@vercel/functions": "^2.0.0",
+    "browser-or-node": "3.0.0",
+    "fast-json-stable-stringify": "^2.1.0",
+    "lodash": "^4.17.21",
+    "xxhashjs": "^0.2.2"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.16",
+    "@types/node": "^22.13.11",
+    "@types/xxhashjs": "^0.2.4",
+    "prettier": "^3.5.3",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.9"
+  }
+}

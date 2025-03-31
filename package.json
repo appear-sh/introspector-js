@@ -1,74 +1,15 @@
 {
-  "name": "@appear.sh/introspector",
-  "version": "1.0.0-alpha.0",
-  "description": "",
-  "type": "module",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "name": "introspector-js-monorepo",
+  "private": true,
   "scripts": {
-    "watch": "tsc --watch",
-    "test": "vitest",
-    "build": "tsc",
-    "lint": "prettier .",
-    "lint:fix": "prettier --write .",
-    "prepublish": "rm -rf ./lib && pnpm run build --build --force"
+    "build": "turbo build",
+    "test": "turbo test",
+    "lint": "turbo lint",
+    "lint:fix": "turbo lint:fix"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/appear-sh/introspector-js.git"
-  },
-  "author": "",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/appear-sh/introspector-js/issues"
-  },
-  "homepage": "https://github.com/appear-sh/introspector-js#readme",
   "devDependencies": {
-    "@fastify/formbody": "^8.0.2",
-    "@hapi/hapi": "^21.4.0",
-    "@koa/router": "^13.1.0",
-    "@nestjs/common": "^11.0.12",
-    "@nestjs/core": "^11.0.12",
-    "@nestjs/platform-express": "^11.0.12",
-    "@nestjs/platform-fastify": "^11.0.12",
-    "@types/aws-lambda": "^8.10.147",
-    "@types/express": "^5.0.1",
-    "@types/koa": "^2.15.0",
-    "@types/koa-bodyparser": "^4.3.12",
-    "@types/koa__router": "^12.0.4",
-    "@types/lodash": "^4.17.16",
-    "@types/node": "^22.13.11",
-    "@types/xxhashjs": "^0.2.4",
-    "axios": "^1.8.4",
-    "body-parser": "^1.20.3",
-    "express": "^4.21.2",
-    "fastify": "^5.2.1",
-    "koa": "^2.16.0",
-    "koa-bodyparser": "^4.4.1",
-    "msw": "^2.7.3",
-    "next": "^15.2.4",
-    "prettier": "^3.5.3",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.2",
-    "vitest": "^3.0.9"
+    "turbo": "^2.4.4",
+    "prettier": "^3.5.3"
   },
-  "dependencies": {
-    "@mswjs/interceptors": "^0.38.0",
-    "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/api-logs": "^0.200.0",
-    "@opentelemetry/core": "^2.0.0",
-    "@opentelemetry/instrumentation": "^0.200.0",
-    "@opentelemetry/instrumentation-http": "^0.200.0",
-    "@opentelemetry/instrumentation-undici": "^0.11.0",
-    "@opentelemetry/sdk-node": "^0.200.0",
-    "@opentelemetry/sdk-trace-base": "^2.0.0",
-    "@opentelemetry/sdk-trace-node": "^2.0.0",
-    "@vercel/functions": "^2.0.0",
-    "browser-or-node": "3.0.0",
-    "fast-json-stable-stringify": "^2.1.0",
-    "lodash": "^4.17.21",
-    "xxhashjs": "^0.2.2"
-  }
+  "packageManager": "pnpm@8.15.4"
 }
