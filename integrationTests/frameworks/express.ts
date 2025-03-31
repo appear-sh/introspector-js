@@ -7,7 +7,7 @@ const expressServer = async () => {
   const app = express()
   app.use(express.json())
 
-  app.post("/test", async (req, res) => {
+  app.post("/api/test", async (req, res) => {
     await makeOutgoingCalls()
     res.json({ message: "Success", body: req.body })
   })

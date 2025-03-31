@@ -13,7 +13,7 @@ export async function makeHttpRequest() {
       },
     )
     httpRequest.on("error", (error) => reject(error))
-    httpRequest.write(JSON.stringify({ source: "http.request" }))
+    httpRequest.write(JSON.stringify({ "http.request": "http.request" }))
     httpRequest.end()
   })
 }
@@ -21,7 +21,7 @@ export async function makeHttpRequest() {
 export async function makeFetchRequest() {
   return fetch("https://httpbin.org/anything", {
     method: "POST",
-    body: JSON.stringify({ source: "fetch" }),
+    body: JSON.stringify({ fetch: "fetch" }),
     headers: { "Content-Type": "application/json" },
   })
 }

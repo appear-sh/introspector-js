@@ -7,6 +7,8 @@ import stringify from "fast-json-stable-stringify"
 const frameworks = [
   "express",
   "fastify",
+  // "next-pages", // no instrumentation works
+  // "next-app", // only outgoing calls work
   // Add more frameworks here (Next.js, etc.)
 ]
 
@@ -34,11 +36,14 @@ frameworks.forEach((framework) => {
       { timeout: 30000 },
       async () => {
         // Make test request
-        const response = await fetch(`http://localhost:${server.port}/test`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ test: "data" }),
-        })
+        const response = await fetch(
+          `http://localhost:${server.port}/api/test`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ test: "data" }),
+          },
+        )
 
         expect(response.status).toBe(200)
         const data = await response.json()

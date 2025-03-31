@@ -46,7 +46,10 @@
     "koa": "^2.16.0",
     "koa-bodyparser": "^4.4.1",
     "msw": "^2.7.3",
+    "next": "^15.2.4",
     "prettier": "^3.5.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2",
     "vitest": "^3.0.9"

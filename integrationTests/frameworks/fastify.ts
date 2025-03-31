@@ -5,7 +5,7 @@ export const fastifyServer = async () => {
   const app = fastify()
 
   // Register the test endpoint
-  app.post("/test", async (request, reply) => {
+  app.post("/api/test", async (request, reply) => {
     const responseBodies = await makeOutgoingCalls()
     return { message: "Success", responseBodies }
   })
