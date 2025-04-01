@@ -4,7 +4,7 @@ import type { AddressInfo } from "net"
 export class MockCollector {
   private server: any
   private port: number = 0
-  private traces: any[] = []
+  private traces: { operations: any[] }[] = []
 
   async start() {
     return new Promise<void>((resolve) => {
@@ -55,25 +55,15 @@ export class MockCollector {
     this.traces = []
   }
 
-  async waitForOperations(
-    expectedOperations: number,
-    timeout = 5000,
-  ): Promise<any[]> {
+  async waitForOperations(count: number, timeout = 5000) {
     const timer = setTimeout(() => {
-      throw new Error(`Timeout waiting for ${expectedOperations} operations`)
+      throw new Error(`Timeout waiting for ${count} operations`)
     }, timeout)
 
     try {
       while (true) {
-        let receivedOperations: any[] = []
-        for (const trace of this.traces) {
-          if (trace?.operations) {
-            receivedOperations = receivedOperations.concat(trace.operations)
-            if (receivedOperations.length >= expectedOperations) {
-              return receivedOperations
-            }
-          }
-        }
+        const operations = this.traces.map((trace) => trace.operations).flat()
+        if (operations.length >= count) return operations
         await new Promise((resolve) => setTimeout(resolve, 100))
       }
     } finally {
