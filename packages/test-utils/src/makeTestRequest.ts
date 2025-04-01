@@ -1,5 +1,8 @@
-export async function makeTestRequest(port: number) {
-  const response = await fetch(`http://localhost:${port}/api/test`, {
+export async function makeTestRequest(
+  port: number,
+  path: string = "/api/test",
+) {
+  const response = await fetch(`http://localhost:${port}${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ test: "data" }),

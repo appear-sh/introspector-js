@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest"
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest"
 import {
   MockCollector,
   startFrameworkServer,
@@ -22,8 +22,13 @@ describe("Express Framework", () => {
     )
   })
 
-  afterAll(async () => {
-    await Promise.all([collector.stop(), server.stop()])
+  afterAll(() => {
+    collector?.stop()
+    server?.stop()
+  })
+
+  beforeEach(() => {
+    collector.clearTraces()
   })
 
   it(
@@ -33,10 +38,10 @@ describe("Express Framework", () => {
       const { response, data } = await makeTestRequest(server.port)
       expect(response.status).toBe(200)
       expect(data.message).toBe("Success")
-      const trace = await collector.waitForTrace(30000)
-      const operations = formatTraceOperations(trace.operations)
-      expect(operations).toMatchSnapshot()
-      expect(operations).toHaveLength(3)
+      const operations = await collector.waitForOperations(3, 30000)
+      const formattedOperations = formatTraceOperations(operations)
+      expect(formattedOperations).toMatchSnapshot()
+      expect(formattedOperations).toHaveLength(3)
     },
   )
 })

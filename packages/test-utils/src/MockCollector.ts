@@ -1,12 +1,10 @@
 import { createServer } from "http"
 import type { AddressInfo } from "net"
-import { EventEmitter } from "events"
 
 export class MockCollector {
   private server: any
   private port: number = 0
   private traces: any[] = []
-  private emitter = new EventEmitter()
 
   async start() {
     return new Promise<void>((resolve) => {
@@ -18,7 +16,6 @@ export class MockCollector {
             try {
               const trace = JSON.parse(body)
               this.traces.push(trace)
-              this.emitter.emit("trace", trace)
               res.writeHead(200)
               res.end()
             } catch (error) {
@@ -54,16 +51,33 @@ export class MockCollector {
     return this.traces
   }
 
-  waitForTrace(timeout = 5000): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
-        reject(new Error("Timeout waiting for trace"))
-      }, timeout)
+  clearTraces() {
+    this.traces = []
+  }
 
-      this.emitter.once("trace", (trace) => {
-        clearTimeout(timer)
-        resolve(trace)
-      })
-    })
+  async waitForOperations(
+    expectedOperations: number,
+    timeout = 5000,
+  ): Promise<any[]> {
+    const timer = setTimeout(() => {
+      throw new Error(`Timeout waiting for ${expectedOperations} operations`)
+    }, timeout)
+
+    try {
+      while (true) {
+        let receivedOperations: any[] = []
+        for (const trace of this.traces) {
+          if (trace?.operations) {
+            receivedOperations = receivedOperations.concat(trace.operations)
+            if (receivedOperations.length >= expectedOperations) {
+              return receivedOperations
+            }
+          }
+        }
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
+    } finally {
+      clearTimeout(timer)
+    }
   }
 }

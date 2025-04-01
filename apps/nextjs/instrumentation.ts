@@ -1,4 +1,4 @@
-import { registerAppear } from "../../../lib"
+import { registerAppear } from "@appear.sh/introspector"
 
 export function register() {
   const collectorUrl = process.env.COLLECTOR_URL

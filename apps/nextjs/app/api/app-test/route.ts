@@ -1,5 +1,5 @@
+import { makeOutgoingCalls } from "@appear.sh/test-utils"
 import { NextResponse } from "next/server"
-import { makeOutgoingCalls } from "../../../../../helpers/outgoingCalls"
 
 export async function POST(request: Request) {
   await makeOutgoingCalls()
