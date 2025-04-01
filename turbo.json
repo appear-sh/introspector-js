@@ -4,13 +4,16 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "lib/**"]
+      "outputs": ["dist/**"]
     },
-    "lint": {
-      "outputs": []
+    "dev": {
+      "dependsOn": ["^build"],
+      "persistent": true,
+      "cache": false
     },
+    "lint": { "outputs": [] },
     "test": {
-      "dependsOn": ["build"],
+      "dependsOn": ["^build"],
       "outputs": []
     }
   }

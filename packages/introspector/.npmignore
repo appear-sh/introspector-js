@@ -1,0 +1,7 @@
+# Ignore everything
+*
+
+# But keep these files
+!dist/
+!package.json
+!README.md
