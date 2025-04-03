@@ -4,8 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "next build",
-    "start": "next start --port 0",
+    "start": "next build && next start --port 0",
     "test": "vitest",
     "lint": "prettier .",
     "lint:fix": "prettier --write ."

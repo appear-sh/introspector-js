@@ -16,10 +16,7 @@ describe("Fastify Framework", () => {
     await collector.start()
 
     // Start framework server in a separate process
-    server = await startFrameworkServer(
-      "src/fastify.server.ts",
-      collector.getUrl(),
-    )
+    server = await startFrameworkServer(collector.getUrl())
   })
 
   afterAll(() => {

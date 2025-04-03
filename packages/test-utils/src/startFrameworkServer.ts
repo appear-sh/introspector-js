@@ -1,30 +1,26 @@
 import { spawn } from "child_process"
 
 export async function startFrameworkServer(
-  filePath: string,
   collectorUrl: string,
+  portMatch: RegExp = /Server started on port (\d+)/,
 ): Promise<{ port: number; stop: () => Promise<void> }> {
   return new Promise((resolve, reject) => {
-    const server = spawn(
-      "node",
-      ["--import", "./src/appear.js", "--loader", "ts-node/esm", filePath],
-      {
-        env: { ...process.env, COLLECTOR_URL: collectorUrl },
-        stdio: ["pipe", "pipe", "pipe"],
-      },
-    )
+    const server = spawn("pnpm", ["start"], {
+      env: { ...process.env, COLLECTOR_URL: collectorUrl },
+      stdio: ["pipe", "pipe", "pipe"],
+    })
 
     let port: number | undefined
     let error = ""
 
     server.stdout.on("data", (data) => {
       const output = data.toString()
-      console.log(`[${filePath}] ${output}`)
+      console.log(`[test server] ${output}`)
 
       // Look for the port number in the output
-      const portMatch = output.match(/Server started on port (\d+)/)
-      if (portMatch) {
-        port = parseInt(portMatch[1], 10)
+      const portStr = output.match(portMatch)
+      if (portStr) {
+        port = parseInt(portStr[1], 10)
         resolve({
           port,
           stop: () =>
@@ -38,15 +34,11 @@ export async function startFrameworkServer(
 
     server.stderr.on("data", (data) => {
       error += data.toString()
-      console.error(`[${filePath}] ${data}`)
+      console.error(`[test server] ${data}`)
     })
 
     server.on("error", (err) => {
-      reject(
-        new Error(
-          `Failed to start ${filePath} server: ${err.message}\n${error}`,
-        ),
-      )
+      reject(new Error(`Failed to start server: ${err.message}\n${error}`))
     })
 
     server.on("close", (code) => {
