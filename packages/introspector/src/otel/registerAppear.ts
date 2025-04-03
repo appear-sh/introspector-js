@@ -4,7 +4,7 @@ import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base"
 import { AppearConfig } from "../config.js"
 import { AppearExporter } from "./AppearExporter.js"
 import { AppearInstrumentation } from "./AppearInstrumentation.js"
-import { fileURLToPath } from "node:url"
+import { pathToFileURL } from "node:url"
 
 // Cross-platform way to get the current module's URL
 const getModuleUrl = () => {
@@ -12,7 +12,7 @@ const getModuleUrl = () => {
     return import.meta.url
   }
   // Fallback for CJS
-  return fileURLToPath(__filename)
+  return pathToFileURL(__filename)
 }
 
 export function registerAppear(config: AppearConfig) {

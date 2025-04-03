@@ -5,7 +5,7 @@
     { "path": "packages/test-utils" },
     { "path": "apps/express" },
     { "path": "apps/fastify" },
-    { "path": "apps/next-app" },
-    { "path": "apps/next-pages" }
+    { "path": "apps/nextjs" },
+    { "path": "apps/nestjs" }
   ]
 }
