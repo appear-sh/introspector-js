@@ -62,7 +62,7 @@ jobs:
           publish: |
             if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
               pnpm changeset version --pre ${{ env.PRE_TAG }}
-              pnpm release --no-git-tag --no-push
+              pnpm release --no-git-tag --no-push --no-changelog
             else
               pnpm release
             fi
