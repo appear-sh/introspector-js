@@ -1,6 +1,7 @@
 {
   "name": "@appear.sh/test-utils",
   "version": "1.0.0-alpha.0",
+  "private": true,
   "description": "Test utilities for introspector",
   "type": "module",
   "main": "./dist/index.js",
