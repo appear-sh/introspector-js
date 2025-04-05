@@ -7,5 +7,5 @@ export default defineConfig({
   format: ["esm", "cjs"],
   dts: true,
   treeshake: true,
-  noExternal: ["@opentelemetry/instrumentation/hook.mjs"],
+  shims: true,
 })

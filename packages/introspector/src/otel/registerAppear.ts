@@ -20,27 +20,29 @@ const getModuleUrl = () => {
 export function registerAppear(config: AppearConfig) {
   if (config.enabled === false) return
 
-  moduleModule.register(
-    "@opentelemetry/instrumentation/hook.mjs",
-    getModuleUrl(),
-  )
+  try {
+    moduleModule.register("@appear.sh/introspector/hook.mjs", getModuleUrl())
 
-  const sdk = new NodeSDK({
-    serviceName: config.serviceName,
-    spanProcessors: [new BatchSpanProcessor(new AppearExporter(config))],
-    instrumentations: [new AppearInstrumentation(config)],
-  })
+    const sdk = new NodeSDK({
+      serviceName: config.serviceName,
+      spanProcessors: [new BatchSpanProcessor(new AppearExporter(config))],
+      instrumentations: [new AppearInstrumentation(config)],
+    })
 
-  sdk.start()
+    sdk.start()
 
-  // listen to shutdown signals and fire sdk.shutdown()
-  process.on("beforeExit", async (exitCode) => {
-    await Promise.race([
-      sdk.shutdown(),
-      new Promise((resolve) => setTimeout(resolve, 5000)),
-    ])
-    process.exit(exitCode)
-  })
+    // listen to shutdown signals and fire sdk.shutdown()
+    process.on("beforeExit", async (exitCode) => {
+      await Promise.race([
+        sdk.shutdown(),
+        new Promise((resolve) => setTimeout(resolve, 5000)),
+      ])
+      process.exit(exitCode)
+    })
 
-  return sdk
+    return sdk
+  } catch (error) {
+    console.error("Failed to register Appear:", error)
+  }
+  return undefined
 }

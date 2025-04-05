@@ -59,6 +59,12 @@ registerAppear({
 node --import ./appear.js server.js
 ```
 
+if your framework use some CLI wrapper around node you can also use env variable approach
+
+```sh
+NODE_OPTIONS='--import ./appear.js' node-wrapper start
+```
+
 ---
 
 #### Nest.js
