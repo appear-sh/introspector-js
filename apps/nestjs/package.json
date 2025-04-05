@@ -1,0 +1,32 @@
+{
+  "name": "@appear.sh/nestjs-test",
+  "version": "1.0.0-alpha.0",
+  "private": true,
+  "scripts": {
+    "test": "vitest",
+    "lint": "prettier .",
+    "lint:fix": "prettier --write .",
+    "start": "nest build && nest start",
+    "start:dev": "nest start --watch"
+  },
+  "dependencies": {
+    "@appear.sh/introspector": "workspace:*",
+    "@appear.sh/test-utils": "workspace:*",
+    "@nestjs/common": "^11.0.13",
+    "@nestjs/core": "^11.0.13",
+    "@nestjs/platform-express": "^11.0.13",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.6",
+    "@types/node": "^22.14.0",
+    "prettier": "^3.5.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.1"
+  },
+  "volta": {
+    "node": "23.10.0"
+  }
+}
