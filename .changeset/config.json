@@ -15,6 +15,6 @@
     "@appear.sh/test-utils"
   ],
   "snapshot": {
-    "prereleaseTemplate": "{tag}.{increment}"
+    "useCalculatedVersion": true
   }
 }
