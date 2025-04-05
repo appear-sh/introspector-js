@@ -11,6 +11,14 @@ on:
         required: false
         type: string
         default: ""
+      type:
+        description: "Release type (prerelease or snapshot)"
+        required: false
+        type: choice
+        options:
+          - snapshot
+          - prerelease
+        default: "snapshot"
 
 jobs:
   release:
@@ -43,7 +51,11 @@ jobs:
       - name: Publish Pre-release
         if: github.event_name == 'workflow_dispatch'
         run: |
-          pnpm changeset version --snapshot ${{ env.PRE_TAG }}
+          if [ "${{ github.event.inputs.type }}" = "prerelease" ]; then
+            pnpm changeset version --pre ${{ env.PRE_TAG }}
+          else
+            pnpm changeset version --snapshot ${{ env.PRE_TAG }}
+          fi
           pnpm changeset publish --tag ${{ env.PRE_TAG }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
