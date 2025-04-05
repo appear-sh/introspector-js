@@ -16,6 +16,7 @@ Because it reports only schema of the traffic, it never sends any actual content
     - [Express/Fastify/Koa](#thin-servers-like-express-fastify-koa--that-start-using-node-serverjs)
     - [Nest.js](#nestjs)
     - [Next.js](#nextjs)
+    - [Custom Integration](#custom-integration)
   - [Validation in Appear.sh](#3-youre-done)
 - [Configuration](#configuration)
 - [FAQ](#faq)
@@ -82,12 +83,13 @@ registerAppear({
 
 _[Example](https://github.com/appear-sh/introspector-js/tree/main/apps/nextjs)_
 
-> Unfortunately, Next.js currently has only partial support/compatibility for OpenTelemetry instrumentation, and so using their provided [instrumentation.ts](https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation) file will result only with partial capture of traffic.
+> Unfortunately, Next.js currently has only partial support/compatibility for automatic OpenTelemetry instrumentation, and so using their provided [instrumentation.ts](https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation) file will result only with partial capture of traffic.
 >
 > - Pages router will capture only incoming requests
 > - App router will capture only outgoing requests
 >
 > We're actively working on improving Next.js support. If you're interested in this integration, please contact us.
+> In the meantime it's always possible to create custom integration. Guide how to do that is in [Custom Integration section](#custom-integration)
 
 1. create instrumentation.ts as described in [Next.js docs](https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation)
 2. add `registerAppear()` in the `register()` hook
@@ -103,6 +105,137 @@ export function register() {
   })
 }
 ```
+
+#### Custom integration
+
+For some frameworks or situations (e.g., edge environments), automatic instrumentation isn't possible. However, you can still manually wrap your handlers to instrument them.
+
+In essence, there are three steps to implement custom integration:
+
+1. Get and normalize Request & Response objects - this heavily depends on your framework and runtime
+2. Call `await process({ request, response, direction })` to process the request and response into an operation
+3. Call `report({ operations, config })` to report the processed operations to Appear
+
+<details>
+<summary style="margin-bottom: 1rem;"><strong>Example code</strong></summary>
+
+In this example
+
+- we create a wrapper around express style handler
+- because express style handler uses `res.json({})` to set response body we use Proxy to capture that
+- normalize Request, Response and Headers in these objects
+- we use Vercel's [waitUntil](https://vercel.com/docs/functions/functions-api-reference/vercel-functions-package#waituntil) which ensures that serverless functions finish reporting data before they are terminated.
+
+This example is intentionally large to show various caveats you may need to navigate. Your integration will be probably simpler.
+
+```ts
+import { process, report, AppearConfig } from "@appear.sh/introspector"
+import { waitUntil } from "@vercel/functions"
+import type {
+  IncomingHttpHeaders,
+  IncomingMessage,
+  OutgoingHttpHeaders,
+  ServerResponse,
+} from "node:http"
+
+type Handler = (
+  req: IncomingMessage & {
+    query: Partial<{ [key: string]: string | string[] }>
+    cookies: Partial<{ [key: string]: string }>
+    body: any
+    env: { [key: string]: string | undefined }
+  },
+  res: ServerResponse & {
+    send: any
+    json: any
+    status: any
+  },
+) => void
+
+const normalizeHeaders = (
+  headers: IncomingHttpHeaders | OutgoingHttpHeaders,
+) => {
+  const entries = Object.entries(headers).reduce(
+    (acc, [key, value]) => {
+      if (typeof value === "string") acc.push([key, value])
+      if (typeof value === "number") acc.push([key, value.toString()])
+      if (Array.isArray(value)) value.forEach((v) => acc.push([key, v]))
+      return acc
+    },
+    [] as [string, string][],
+  )
+  return new Headers(entries)
+}
+
+const normalizeRequest = (req: IncomingMessage & { body: any }) => {
+  const protocol = req.headers["x-forwarded-proto"] || "http"
+  const host = req.headers["x-forwarded-host"] || req.headers.host || "unknown"
+
+  return new Request(new URL(req.url!, `${protocol}://${host}`), {
+    method: req.method,
+    headers: normalizeHeaders(req.headers),
+    body: req.body || null,
+  })
+}
+
+const normalizeResponse = (
+  res: ServerResponse,
+  body: object | string | Buffer | null | undefined,
+) => {
+  const responseHeaders = normalizeHeaders(res.getHeaders())
+  // 204 No Content, 304 Not Modified don't allow body https://nextjs.org/docs/messages/invalid-api-status-body
+  if (res.statusCode === 204 || res.statusCode === 304) {
+    body = null
+  }
+  // Response accepts only string or Buffer and next supports objects
+  if (body && typeof body === "object" && !Buffer.isBuffer(body)) {
+    body = JSON.stringify(body)
+  }
+  return new Response(body, {
+    status: res.statusCode,
+    statusText: res.statusMessage,
+    headers: responseHeaders,
+  })
+}
+
+export function withAppear(handler: Handler, config: AppearConfig): Handler {
+  return async (req, baseRes) => {
+    // create a proxy to capture the response body
+    // we need to do this because the syntax is res.json({ some: content })
+    let body: object | string | Buffer | null | undefined
+    const res = new Proxy(baseRes, {
+      get(target, prop, receiver) {
+        if (prop === "json" || prop === "send") {
+          return (content: any) => {
+            body = content
+            return Reflect.get(target, prop, receiver)(content)
+          }
+        }
+        return Reflect.get(target, prop, receiver)
+      },
+    })
+
+    const result = await handler(req, res)
+    try {
+      const request = normalizeRequest(req)
+      const response = normalizeResponse(res, body)
+      const operation = await process({
+        request,
+        response,
+        direction: "incoming",
+      })
+
+      // report, don't await so we don't slow down response time
+      waitUntil(report(operation, config))
+    } catch (e) {
+      console.error("[Appear introspector] failed with error", e)
+    }
+    return result
+  }
+}
+```
+
+</details>
 
 ### 3. you're done
 

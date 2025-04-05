@@ -14,11 +14,8 @@ export async function startFrameworkServer(
     let error = ""
 
     server.stdout.on("data", (data) => {
-      const output = data.toString()
-      console.log(`[test server] ${output}`)
-
       // Look for the port number in the output
-      const portStr = output.match(portMatch)
+      const portStr = data.toString().match(portMatch)
       if (portStr) {
         port = parseInt(portStr[1], 10)
         resolve({
@@ -34,7 +31,6 @@ export async function startFrameworkServer(
 
     server.stderr.on("data", (data) => {
       error += data.toString()
-      console.error(`[test server] ${data}`)
     })
 
     server.on("error", (err) => {
