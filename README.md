@@ -172,10 +172,8 @@ export interface AppearConfig {
 
 ## FAQ
 
-### Data Privacy and Security
-
 <details>
-<summary>**What data does the introspector collect and report?**</summary>
+<summary style="margin-bottom: 1rem;"><strong>What data does the introspector collect and report?</strong></summary>
 
 The introspector only collects and reports the structure (schema) of your API traffic. It does not collect or transmit:
 
