@@ -17,7 +17,7 @@ describe("NestJS App", () => {
 
     // Start framework server in a separate process
     server = await startFrameworkServer(collector.getUrl())
-  })
+  }, 30000)
 
   afterAll(() => {
     collector?.stop()

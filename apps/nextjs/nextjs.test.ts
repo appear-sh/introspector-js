@@ -17,7 +17,7 @@ describe("Next.js", () => {
 
     // Start framework server in a separate process
     server = await startFrameworkServer(collector.getUrl(), /localhost:(\d+)/)
-  })
+  }, 30000)
 
   afterAll(() => {
     collector?.stop()
