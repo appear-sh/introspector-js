@@ -5,6 +5,7 @@
     "build": "turbo build",
     "test": "turbo test",
     "test:update": "turbo test -- -u",
+    "test:types": "turbo test:types",
     "dev": "turbo dev",
     "lint": "turbo lint",
     "lint:fix": "turbo lint:fix",

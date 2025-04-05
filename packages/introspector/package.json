@@ -11,22 +11,38 @@
     "LICENSE",
     "README.md"
   ],
+  "typesVersions": {
+    "*": {
+      "node": [
+        "./dist/node.d.ts"
+      ]
+    }
+  },
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "default": "./dist/index.js"
+      "import": {
+        "import": "./dist/index.mjs",
+        "types": "./dist/index.d.mts"
+      },
+      "default": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      }
     },
     "./node": {
-      "types": "./dist/node.d.ts",
-      "import": "./dist/node.mjs",
-      "require": "./dist/node.js",
-      "default": "./dist/node.js"
+      "import": {
+        "import": "./dist/node.mjs",
+        "types": "./dist/node.d.mts"
+      },
+      "default": {
+        "import": "./dist/node.js",
+        "types": "./dist/node.d.ts"
+      }
     }
   },
   "scripts": {
     "test": "vitest",
+    "test:types": "npx --yes @arethetypeswrong/cli --pack .",
     "build": "tsup",
     "dev": "tsup --watch",
     "lint": "prettier .",

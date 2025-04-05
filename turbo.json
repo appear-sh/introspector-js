@@ -16,6 +16,7 @@
     "test": {
       "dependsOn": ["^build"],
       "outputs": []
-    }
+    },
+    "test:types": { "outputs": [] }
   }
 }
