@@ -54,7 +54,13 @@ jobs:
           if [ "${{ github.event.inputs.type }}" = "prerelease" ]; then
             # For prerelease
             pnpm changeset pre enter ${{ env.PRE_TAG }}
-            pnpm changeset version
+            # Get the latest version from npm for this tag
+            LATEST_VERSION=$(npm view @appear.sh/introspector@${{ env.PRE_TAG }} version || echo "")
+            if [ -n "$LATEST_VERSION" ]; then
+              pnpm changeset version --from $LATEST_VERSION
+            else
+              pnpm changeset version
+            fi
             pnpm changeset publish
           else
             # For snapshot releases
