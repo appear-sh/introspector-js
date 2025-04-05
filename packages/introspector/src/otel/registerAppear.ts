@@ -22,6 +22,8 @@ export function registerAppear(config: AppearConfig) {
 
   try {
     moduleModule.register("@appear.sh/introspector/hook.mjs", getModuleUrl())
+    // @ts-ignore this is here just to make sure webpack bundles the hook
+    import("@appear.sh/introspector/hook.mjs")
 
     const sdk = new NodeSDK({
       serviceName: config.serviceName,
