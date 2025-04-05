@@ -62,11 +62,11 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.17.16",
-    "@types/node": "^22.13.11",
+    "@types/node": "^22.14.0",
     "@types/xxhashjs": "^0.2.4",
     "prettier": "^3.5.3",
     "tsup": "^8.4.0",
-    "typescript": "^5.8.2",
-    "vitest": "^3.0.9"
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.1"
   }
 }
