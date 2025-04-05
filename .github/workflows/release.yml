@@ -52,22 +52,14 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         run: |
           if [ "${{ github.event.inputs.type }}" = "prerelease" ]; then
-            # Enter prerelease mode
+            # For prerelease
             pnpm changeset pre enter ${{ env.PRE_TAG }}
-            # Version packages
             pnpm changeset version
-            # Log the version of the introspector package
-            echo "Introspector package version after changeset version:"
-            node -p "require('./packages/introspector/package.json').version"
-            # Publish with the specified tag
-            # pnpm changeset publish --tag ${{ env.PRE_TAG }}
+            pnpm changeset publish --tag ${{ env.PRE_TAG }}
           else
             # For snapshot releases
             pnpm changeset version --snapshot ${{ env.PRE_TAG }}
-            # Log the version of the introspector package
-            echo "Introspector package version after changeset version:"
-            node -p "require('./packages/introspector/package.json').version"
-            # pnpm changeset publish --tag ${{ env.PRE_TAG }}
+            pnpm changeset publish --tag ${{ env.PRE_TAG }}
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
