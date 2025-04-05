@@ -55,7 +55,7 @@ jobs:
             # For prerelease
             pnpm changeset pre enter ${{ env.PRE_TAG }}
             pnpm changeset version
-            pnpm changeset publish --tag ${{ env.PRE_TAG }}
+            pnpm changeset publish
           else
             # For snapshot releases
             pnpm changeset version --snapshot ${{ env.PRE_TAG }}
