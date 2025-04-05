@@ -1,10 +1,13 @@
 import { MeterProvider, TracerProvider } from "@opentelemetry/api"
 import { LoggerProvider } from "@opentelemetry/api-logs"
 import { Instrumentation } from "@opentelemetry/instrumentation"
-import packageJson from "../../package.json" with { type: "json" }
 import { AppearConfig, resolveConfig, ResolvedAppearConfig } from "../config.js"
 import { HttpInstrumentation } from "./HttpInstrumentation.js"
 import { UndiciInstrumentation } from "./UndiciInstrumentation.js"
+
+// Get package info
+// @ts-ignore - This is a dynamic require that TypeScript doesn't understand
+const packageJson = require("../../package.json")
 
 export class AppearInstrumentation implements Instrumentation<AppearConfig> {
   public instrumentationName = packageJson.name

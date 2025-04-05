@@ -1,6 +1,6 @@
 import { NestFactory } from "@nestjs/core"
 import { AppModule } from "./app.module"
-import { registerAppear } from "@appear.sh/introspector"
+import { registerAppear } from "@appear.sh/introspector/node"
 
 registerAppear({
   apiKey: "test-key",

@@ -6,7 +6,7 @@ import {
   startFrameworkServer,
 } from "@appear.sh/test-utils"
 
-describe("Next.js App Router", () => {
+describe("Next.js", () => {
   let collector: MockCollector
   let server: { port: number; stop: () => Promise<void> }
 

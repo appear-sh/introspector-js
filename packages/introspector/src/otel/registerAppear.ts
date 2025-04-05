@@ -8,7 +8,9 @@ import { pathToFileURL } from "node:url"
 
 // Cross-platform way to get the current module's URL
 const getModuleUrl = () => {
+  // @ts-ignore
   if (typeof import.meta !== "undefined" && import.meta.url) {
+    // @ts-ignore
     return import.meta.url
   }
   // Fallback for CJS

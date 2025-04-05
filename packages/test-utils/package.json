@@ -3,12 +3,14 @@
   "version": "1.0.0-alpha.0",
   "private": true,
   "description": "Test utilities for introspector",
-  "type": "module",
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
       "default": "./dist/index.js"
     }
   },

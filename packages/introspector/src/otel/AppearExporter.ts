@@ -1,9 +1,12 @@
 import { ExportResult, ExportResultCode } from "@opentelemetry/core"
 import { ReadableSpan, SpanExporter } from "@opentelemetry/sdk-trace-base"
 import xxhash from "xxhashjs"
-import packageJson from "../../package.json" with { type: "json" }
 import { AppearConfig, resolveConfig, ResolvedAppearConfig } from "../config.js"
 import { DEFAULT_REPORTING_ENDPOINT, Operation, Report } from "../report.js"
+
+// Get version from package.json
+// @ts-ignore - This is a dynamic require that TypeScript doesn't understand
+const packageJson = require("../../package.json")
 
 /**
  * This is implementation of {@link SpanExporter} that sends Appear specific spans to Appear.

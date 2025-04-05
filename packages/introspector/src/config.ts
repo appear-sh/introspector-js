@@ -2,11 +2,28 @@ import { defaultInterceptFilter } from "./helpers.js"
 import { DEFAULT_REPORTING_ENDPOINT } from "./report.js"
 
 export interface AppearConfig {
-  /** API key used for reporting */
+  /**
+   * API key used for reporting
+   * you can obtain your reporting key in keys section in Appear settings
+   * reporting keys have only the permission to report schema and can't read any data
+   * you can use any method to inject the key, in examples we used env variable
+   */
   apiKey: string
-  /** environment where the report is sent from */
+  /**
+   * Environment where the report is sent from
+   * it can be any string that identifies environment data are reported from.
+   * Often used as "production" or "staging", however if you're using some form of ephemeral farm feel free to use it's identifier
+   */
   environment: string
 
+  /**
+   * Name of current service
+   * used to improve accuracy of matching, useful when you're not using descriptive host names in incoming requests
+   * for example if you're using directly IP addresses
+   *
+   * @optional
+   * @default hostname if not provided the service name will be detected from hostname
+   */
   serviceName?: string
 
   /**
@@ -26,32 +43,9 @@ export interface AppearConfig {
      * @default https://api.appear.sh/v1/reports
      */
     endpoint?: string
-    /**
-     * interval how often are batches sent
-     * `0` means that reports are sent immidiately
-     *
-     * @default 5
-     */
-    batchIntervalSeconds?: number
-    /** number of items in batch before it reports them
-     * report can be triggered be either time or size depending on what happens first
-     *
-     * every schema is reported only once
-     *
-     * `0` means batching is disabled and reports are sent immidiately
-     *
-     * @default 10
-     */
-    batchSize?: number
   }
 
   interception?: {
-    /**
-     * disables XHR introspection hook which may introduce noise in some situations
-     *
-     * @default false
-     */
-    disableXHR?: boolean
     /**
      * Optional function that allows to filter what request/response pair is getting analyzed and reported
      *
@@ -79,13 +73,10 @@ export function resolveConfig(input: AppearConfig): ResolvedAppearConfig {
     enabled: true,
     ...input,
     interception: {
-      disableXHR: false,
       filter: defaultInterceptFilter,
       ...input["interception"],
     },
     reporting: {
-      batchIntervalSeconds: 5,
-      batchSize: 10,
       endpoint: DEFAULT_REPORTING_ENDPOINT,
       ...input["reporting"],
     },

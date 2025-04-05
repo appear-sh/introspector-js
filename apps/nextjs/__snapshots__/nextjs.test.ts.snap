@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Next.js App Router > should capture traces for incoming request and outgoing calls with app router 1`] = `
+exports[`Next.js > should capture traces for incoming request and outgoing calls with app router 1`] = `
 [
   {
     "direction": "outgoing",
@@ -413,7 +413,7 @@ exports[`Next.js App Router > should capture traces for incoming request and out
 ]
 `;
 
-exports[`Next.js App Router > should capture traces for incoming request and outgoing calls with pages router 1`] = `
+exports[`Next.js > should capture traces for incoming request and outgoing calls with pages router 1`] = `
 [
   {
     "direction": "incoming",

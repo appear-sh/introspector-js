@@ -1,4 +1,4 @@
-import { registerAppear } from "@appear.sh/introspector"
+import { registerAppear } from "@appear.sh/introspector/node"
 
 registerAppear({
   apiKey: "test-key",
