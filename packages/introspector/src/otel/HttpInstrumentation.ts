@@ -89,23 +89,31 @@ export class HttpInstrumentation extends OgHttpInstrumentation {
 export const bodySymbol = Symbol("body")
 
 export async function readIncomingMessageBody(
-  req: IncomingMessage & {
+  resReq: IncomingMessage & {
     [bodySymbol]?: Promise<string | null>
   },
 ): Promise<string | null> {
-  req[bodySymbol] = new Promise((resolve) => {
+  resReq[bodySymbol] = new Promise((resolve) => {
     const chunks: Buffer[] = []
-    req.on("data", (chunk: Buffer | string) =>
+    resReq.on("data", (chunk: Buffer | string) => {
       chunks.push(
         typeof chunk === "string" ? Buffer.from(chunk, "utf8") : chunk,
-      ),
-    )
-    req.on("end", () => {
+      )
+    })
+    resReq.on("end", () => {
       if (chunks.length === 0) return resolve(null)
-      resolve(Buffer.concat(chunks).toString())
+      // responses have full serialized object in data instead of just body
+      if (resReq.statusCode) {
+        // is response
+        const body = JSON.parse(Buffer.concat(chunks).toString()).json
+        resolve(JSON.stringify(body))
+      } else {
+        // is request
+        resolve(Buffer.concat(chunks).toString())
+      }
     })
   })
-  return req[bodySymbol]
+  return resReq[bodySymbol]
 }
 
 export function readOutgoingMessageBody(

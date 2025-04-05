@@ -95,10 +95,11 @@ export class UndiciInstrumentation extends OgUndiciInstrumentation {
   }
 
   protected undiciResponseToResponse(
-    body: Buffer,
+    data: Buffer,
     undiciResponse: UndiciResponse,
   ): Response {
-    return new Response(body, {
+    const body = JSON.parse(data.toString()).json
+    return new Response(JSON.stringify(body), {
       status: undiciResponse.statusCode,
       statusText: undiciResponse.statusText,
       headers: this.readUndiciHeaders(undiciResponse.headers),
@@ -112,7 +113,7 @@ export class UndiciInstrumentation extends OgUndiciInstrumentation {
       let header = headersArray.shift()?.toString()
       let value
       if (header?.includes(": ")) {
-        [header, value] = header.split(": ")
+        ;[header, value] = header.split(": ")
       } else {
         value = headersArray.shift()
       }

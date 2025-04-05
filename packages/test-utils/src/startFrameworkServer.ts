@@ -14,6 +14,8 @@ export async function startFrameworkServer(
     let error = ""
 
     server.stdout.on("data", (data) => {
+      // console.debug(`[test server] ${data.toString()}`)
+
       // Look for the port number in the output
       const portStr = data.toString().match(portMatch)
       if (portStr) {
