@@ -23,6 +23,7 @@ export function registerAppear(config: AppearConfig) {
   try {
     moduleModule.register("import-in-the-middle/hook.mjs", getModuleUrl())
 
+
     const sdk = new NodeSDK({
       serviceName: config.serviceName,
       spanProcessors: [new BatchSpanProcessor(new AppearExporter(config))],

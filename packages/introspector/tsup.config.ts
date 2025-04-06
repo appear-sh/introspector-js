@@ -8,4 +8,7 @@ export default defineConfig({
   dts: true,
   treeshake: true,
   shims: true,
+  noExternal: ["import-in-the-middle/hook.mjs"],
+  splitting: false,
+  external: [],
 })
