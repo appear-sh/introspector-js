@@ -8,6 +8,11 @@ export async function makeTestRequest(
     body: JSON.stringify({ test: "data" }),
   })
 
-  const data = (await response.json()) as { message: string }
-  return { response, data }
+  if (response.headers.get("content-type")?.includes("application/json")) {
+    const data = (await response.json()) as { message: string }
+    return { response, data }
+  } else {
+    const data = await response.text()
+    return { response, data }
+  }
 }

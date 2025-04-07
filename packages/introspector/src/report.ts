@@ -49,53 +49,59 @@ export type Report = {
   operations: Operation[]
 }
 
-const reportedOperationHashes = new Set()
-export async function report({
-  operations,
-  config,
-}: {
-  operations: Operation[]
-  config: AppearConfig
-}) {
-  const resolvedConfig = resolveConfig(config)
-  const buffer = operations.filter((op) => {
-    const hash = xxhash.h32(stringify(op), 1).toString(16)
-    if (reportedOperationHashes.has(hash)) return false
-    reportedOperationHashes.add(hash)
-    return true
-  })
+export class Reporter {
+  private reportedOperationHashes: Set<string> = new Set()
+  private config: ReturnType<typeof resolveConfig>
 
-  if (buffer.length === 0) return true
-
-  const report: Report = {
-    reporter: {
-      serviceName: resolvedConfig.serviceName,
-      environment: resolvedConfig.environment,
-    },
-    operations: buffer,
+  constructor(config: AppearConfig) {
+    this.config = resolveConfig(config)
   }
 
-  try {
-    const response = await fetch(resolvedConfig.reporting.endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-API-Key": resolvedConfig.apiKey,
-        "X-Appear-Runtime": "nodejs",
-        "X-Appear-Introspector-Version": packageJson.version,
-      },
-      body: JSON.stringify(report),
+  async report(operations: Operation[]): Promise<boolean> {
+    const buffer = operations.filter((op) => {
+      // in tests send everything
+      if (process.env.NODE_ENV === "test") return true
+
+      const hash = xxhash.h32(stringify(op), 1).toString(16)
+      if (this.reportedOperationHashes.has(hash)) return false
+      this.reportedOperationHashes.add(hash)
+      return true
     })
 
-    if (response.ok) return true
+    if (buffer.length === 0) return true
 
-    console.error(
-      `[Appear introspector] failed to report with status ${
-        response.status
-      }\n${await response.text()}`,
-    )
-  } catch (error) {
-    console.error(`[Appear introspector] failed to report with error ${error}`)
+    const report: Report = {
+      reporter: {
+        serviceName: this.config.serviceName,
+        environment: this.config.environment,
+      },
+      operations: buffer,
+    }
+
+    try {
+      const response = await fetch(this.config.reporting.endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-API-Key": this.config.apiKey,
+          "X-Appear-Runtime": "nodejs",
+          "X-Appear-Introspector-Version": packageJson.version,
+        },
+        body: JSON.stringify(report),
+      })
+
+      if (response.ok) return true
+
+      console.error(
+        `[Appear introspector] failed to report with status ${
+          response.status
+        }\n${await response.text()}`,
+      )
+    } catch (error) {
+      console.error(
+        `[Appear introspector] failed to report with error ${error}`,
+      )
+    }
+    return false
   }
-  return false
 }

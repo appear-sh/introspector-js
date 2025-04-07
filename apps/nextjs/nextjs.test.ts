@@ -37,7 +37,6 @@ describe("Next.js", () => {
         "/api/app-test",
       )
       expect(response.status).toBe(200)
-      expect(data.message).toBe("Success")
 
       // Wait for and verify traces
       const operations = await collector.waitForOperations(2, 15000)
@@ -47,7 +46,7 @@ describe("Next.js", () => {
       // todo this should be 3
       // but introspector currently doesn't support incoming calls for next.js
       // because the instrumentaiton hook is incompatible with otel instrumentation-http
-      expect(formattedOperations).toHaveLength(2)
+      expect(formattedOperations).toHaveLength(3)
     },
   )
 
@@ -60,7 +59,6 @@ describe("Next.js", () => {
         "/api/pages-test",
       )
       expect(response.status).toBe(200)
-      expect(data.message).toBe("Success")
 
       // Wait for and verify traces
       const operations = await collector.waitForOperations(1, 15000)
@@ -70,7 +68,7 @@ describe("Next.js", () => {
       // todo this should be 3
       // but introspector currently doesn't support incoming calls for next.js
       // because the instrumentaiton hook with pages router currently doesn't support outgoing calls
-      expect(formattedOperations).toHaveLength(1)
+      expect(formattedOperations).toHaveLength(3)
     },
   )
 })

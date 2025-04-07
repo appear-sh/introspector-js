@@ -1,7 +1,7 @@
 import { ExportResult, ExportResultCode } from "@opentelemetry/core"
 import { ReadableSpan, SpanExporter } from "@opentelemetry/sdk-trace-base"
-import { AppearConfig, resolveConfig, ResolvedAppearConfig } from "../config.js"
-import { Operation, report } from "../report.js"
+import { AppearConfig } from "../config.js"
+import { Operation, Reporter } from "../report.js"
 
 /**
  * This is implementation of {@link SpanExporter} that sends Appear specific spans to Appear.
@@ -9,10 +9,10 @@ import { Operation, report } from "../report.js"
  */
 export class AppearExporter implements SpanExporter {
   protected pendingExports: Set<Promise<void>> = new Set()
-  protected readonly config: ResolvedAppearConfig
+  protected readonly reporter: Reporter
 
-  constructor(partialConfig: AppearConfig) {
-    this.config = resolveConfig(partialConfig)
+  constructor(config: AppearConfig) {
+    this.reporter = new Reporter(config)
   }
 
   /**
@@ -29,10 +29,8 @@ export class AppearExporter implements SpanExporter {
       .filter(Boolean)
       .map((op) => JSON.parse(op as string) as Operation)
 
-    const pendingExport = report({
-      operations,
-      config: this.config,
-    })
+    const pendingExport = this.reporter
+      .report(operations)
       .then(() => resultCallback({ code: ExportResultCode.SUCCESS }))
       .catch((error) =>
         resultCallback({ code: ExportResultCode.FAILED, error }),

@@ -95,12 +95,14 @@ export async function readIncomingMessageBody(
 ): Promise<string | null> {
   resReq[bodySymbol] = new Promise((resolve) => {
     const chunks: Buffer[] = []
-    resReq.on("data", (chunk: Buffer | string) => {
+
+    resReq.prependListener("data", (chunk: Buffer | string) => {
       chunks.push(
         typeof chunk === "string" ? Buffer.from(chunk, "utf8") : chunk,
       )
     })
-    resReq.on("end", () => {
+
+    resReq.prependListener("end", () => {
       if (chunks.length === 0) return resolve(null)
       // responses have full serialized object in data instead of just body
       if (resReq.statusCode) {

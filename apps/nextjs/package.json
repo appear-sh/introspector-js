@@ -1,10 +1,10 @@
 {
-  "name": "@appear.sh/next-app-test",
+  "name": "@appear.sh/nextjs-test",
   "version": "1.0.0-alpha.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "next build && next start --port 0",
+    "start": "next build && NODE_OPTIONS='--import ./appear.js' next start --port 0",
     "test": "vitest",
     "lint": "prettier .",
     "lint:fix": "prettier --write ."
