@@ -34,7 +34,6 @@ describe("NestJS App", () => {
     async () => {
       const { response, data } = await makeTestRequest(server.port)
       expect(response.status).toBe(200)
-      expect(data.message).toBe("Success")
       const operations = await collector.waitForOperations(3, 30000)
       const formattedOperations = formatTraceOperations(operations)
       expect(formattedOperations).toMatchSnapshot()

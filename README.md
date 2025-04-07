@@ -50,6 +50,7 @@ import { registerAppear } from "@appear.sh/introspector/node"
 registerAppear({
   apiKey: process.env.APPEAR_REPORTING_KEY,
   environment: process.env.NODE_ENV,
+  serviceName: "User Service", // name of the service you're instrumenting (optional)
 })
 ```
 
@@ -80,6 +81,7 @@ import { registerAppear } from "@appear.sh/introspector/node"
 registerAppear({
   apiKey: process.env.APPEAR_REPORTING_KEY,
   environment: process.env.NODE_ENV,
+  serviceName: "User Service", // name of the service you're instrumenting (optional)
 })
 ```
 
@@ -89,28 +91,35 @@ registerAppear({
 
 _[Example](https://github.com/appear-sh/introspector-js/tree/main/apps/nextjs)_
 
-> Unfortunately, Next.js currently has only partial support/compatibility for automatic OpenTelemetry instrumentation, and so using their provided [instrumentation.ts](https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation) file will result only with partial capture of traffic.
->
-> - Pages router will capture only incoming requests
-> - App router will capture only outgoing requests
->
-> We're actively working on improving Next.js support. If you're interested in this integration, please contact us.
-> In the meantime it's always possible to create custom integration. Guide how to do that is in [Custom Integration section](#custom-integration)
+**Hosted on Vercel and other serverless platforms**
 
-1. create instrumentation.ts as described in [Next.js docs](https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation)
-2. add `registerAppear()` in the `register()` hook
+Unfortunately, Next.js when hosted on Vercel and other serverless platforms doesn't have a good way how instrument API routes in a way that would allow us to properly detect traffic. Even the [instrumentation.ts](https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation) doesn't fully work with OpenTelemetry as expected
+
+In these scenarios please follow [Custom Integration](#custom-integration) guide to create a wrapper around API route handlers.
+
+**Self-Hosted as service using `next start`**
+
+1. create `appear.js` file with
 
 ```ts
-// instrumentation.ts
 import { registerAppear } from "@appear.sh/introspector/node"
 
-export function register() {
-  registerAppear({
-    apiKey: process.env.APPEAR_REPORTING_KEY,
-    environment: process.env.NODE_ENV,
-  })
+registerAppear({
+  apiKey: process.env.APPEAR_REPORTING_KEY,
+  environment: process.env.NODE_ENV,
+  serviceName: "User Service", // name of the service you're instrumenting (optional)
+})
+```
+
+2. Update your start script and pass `NODE_OPTIONS` variable to register appear hook.
+
+```json
+"scripts": {
+  "start": "NODE_OPTIONS='--import ./appear.js' next start"
 }
 ```
+
+---
 
 #### Custom integration
 

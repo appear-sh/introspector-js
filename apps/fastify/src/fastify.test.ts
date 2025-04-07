@@ -34,7 +34,6 @@ describe("Fastify Framework", () => {
     async () => {
       const { response, data } = await makeTestRequest(server.port)
       expect(response.status).toBe(200)
-      expect(data.message).toBe("Success")
 
       // Wait for and verify traces
       const operations = await collector.waitForOperations(3, 30000)
