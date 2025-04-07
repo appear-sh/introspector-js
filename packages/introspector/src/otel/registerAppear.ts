@@ -21,10 +21,11 @@ export function registerAppear(config: AppearConfig) {
   if (config.enabled === false) return
 
   try {
-    moduleModule.register("import-in-the-middle/hook.mjs", getModuleUrl())
-
-    // Use import to force webpack to bundle the hook
-    import("import-in-the-middle/hook.mjs").catch(() => {})
+    try {
+      moduleModule.register("@opentelemetry/instrumentation/hook.mjs", getModuleUrl())
+    } catch (error) {
+      // this is expected to fail in some environments
+    }
 
     const sdk = new NodeSDK({
       serviceName: config.serviceName,
