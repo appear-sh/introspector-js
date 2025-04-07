@@ -5,7 +5,7 @@ import { makeOutgoingCalls } from "@appear.sh/test-utils"
 export class TestController {
   @Post("test")
   async test(@Body() body: any, @Res() res: any) {
-    await makeOutgoingCalls()
+    await makeOutgoingCalls("nestjs")
     return res.status(HttpStatus.OK).json({ message: "Success", body })
   }
 }

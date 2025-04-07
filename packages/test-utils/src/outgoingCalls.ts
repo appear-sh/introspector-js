@@ -1,4 +1,4 @@
-export async function makeHttpRequest() {
+export async function makeHttpRequest(key: string) {
   return new Promise(async (resolve, reject) => {
     const https = await import("node:https")
     const httpRequest = https.request(
@@ -13,19 +13,19 @@ export async function makeHttpRequest() {
       },
     )
     httpRequest.on("error", (error) => reject(error))
-    httpRequest.write(JSON.stringify({ "http.request": "http.request" }))
+    httpRequest.write(JSON.stringify({ "http.request": "http.request", key }))
     httpRequest.end()
   })
 }
 
-export async function makeFetchRequest() {
+export async function makeFetchRequest(key: string) {
   return fetch("https://httpbin.org/anything", {
     method: "POST",
-    body: JSON.stringify({ fetch: "fetch" }),
+    body: JSON.stringify({ fetch: "fetch", key }),
     headers: { "Content-Type": "application/json" },
   })
 }
 
-export async function makeOutgoingCalls() {
-  await Promise.all([makeHttpRequest(), makeFetchRequest()])
+export async function makeOutgoingCalls(key: string) {
+  await Promise.all([makeHttpRequest(key), makeFetchRequest(key)])
 }

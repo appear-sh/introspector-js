@@ -59,9 +59,6 @@ export class Reporter {
 
   async report(operations: Operation[]): Promise<boolean> {
     const buffer = operations.filter((op) => {
-      // in tests send everything
-      if (process.env.NODE_ENV === "test") return true
-
       const hash = xxhash.h32(stringify(op), 1).toString(16)
       if (this.reportedOperationHashes.has(hash)) return false
       this.reportedOperationHashes.add(hash)

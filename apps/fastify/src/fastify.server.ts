@@ -4,7 +4,7 @@ import { makeOutgoingCalls } from "@appear.sh/test-utils"
 const app = fastify()
 
 app.post("/api/test", async (request, reply) => {
-  await makeOutgoingCalls()
+  await makeOutgoingCalls("fastify")
   return { message: "Success", body: request.body }
 })
 

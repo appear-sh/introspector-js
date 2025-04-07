@@ -142,9 +142,15 @@ exports[`Express Framework > should capture traces for incoming request and outg
               "minLength": 12,
               "type": "string",
             },
+            "key": {
+              "maxLength": 7,
+              "minLength": 7,
+              "type": "string",
+            },
           },
           "required": [
             "http.request",
+            "key",
           ],
           "type": "object",
         },
@@ -181,9 +187,15 @@ exports[`Express Framework > should capture traces for incoming request and outg
               "minLength": 12,
               "type": "string",
             },
+            "key": {
+              "maxLength": 7,
+              "minLength": 7,
+              "type": "string",
+            },
           },
           "required": [
             "http.request",
+            "key",
           ],
           "type": "object",
         },
@@ -286,9 +298,15 @@ exports[`Express Framework > should capture traces for incoming request and outg
               "minLength": 5,
               "type": "string",
             },
+            "key": {
+              "maxLength": 7,
+              "minLength": 7,
+              "type": "string",
+            },
           },
           "required": [
             "fetch",
+            "key",
           ],
           "type": "object",
         },
