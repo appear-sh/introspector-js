@@ -6,7 +6,7 @@ Appear is an API development platform that helps companies understand, improve, 
 
 This JS introspector is a tool that listens to both incoming and outgoing traffic in JS runtime (browser, node) and detects the shape (schema) of it and reports this schema to Appear platform where it's further merged, processed, and analyzed.
 
-Because it reports only schema of the traffic, it never sends any actual content of the data nor PII.
+Because it reports only the schema of the traffic, it never sends any actual content of the data nor PII.
 
 ## Table of Contents
 
@@ -93,7 +93,7 @@ _[Example](https://github.com/appear-sh/introspector-js/tree/main/apps/nextjs)_
 
 **Hosted on Vercel and other serverless platforms**
 
-Unfortunately, Next.js when hosted on Vercel and other serverless platforms doesn't have a good way how instrument API routes in a way that would allow us to properly detect traffic. Even the [instrumentation.ts](https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation) doesn't fully work with OpenTelemetry as expected
+Unfortunately, Next.js when hosted on Vercel and other serverless platforms doesn't have a good way to instrument API routes in a way that would allow us to properly detect traffic. Even the [instrumentation.ts](https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation) doesn't fully work with OpenTelemetry as expected
 
 In these scenarios please follow [Custom Integration](#custom-integration) guide to create a wrapper around API route handlers.
 
@@ -270,7 +270,7 @@ export interface AppearConfig {
   /**
    * Environment where the report is sent from
    * it can be any string that identifies environment data are reported from.
-   * Often used as "production" or "staging", however if you're using some form of ephemeral farm feel free to use it's identifier
+   * Often used as "production" or "staging", however if you're using some form of ephemeral environment feel free to use its identifier
    */
   environment: string
 
