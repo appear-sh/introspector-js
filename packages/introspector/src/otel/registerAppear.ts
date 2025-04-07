@@ -23,6 +23,8 @@ export function registerAppear(config: AppearConfig) {
   try {
     moduleModule.register("import-in-the-middle/hook.mjs", getModuleUrl())
 
+    // Use import to force webpack to bundle the hook
+    import("import-in-the-middle/hook.mjs").catch(() => {})
 
     const sdk = new NodeSDK({
       serviceName: config.serviceName,
