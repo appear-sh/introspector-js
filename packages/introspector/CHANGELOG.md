@@ -1,5 +1,11 @@
 # @appear.sh/introspector
 
+## 1.0.1
+
+### Patch Changes
+
+- 87be47c: Fix Reporter export
+
 ## 1.0.0
 
 ### Major Changes

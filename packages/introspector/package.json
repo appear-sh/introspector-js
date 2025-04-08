@@ -1,6 +1,6 @@
 {
   "name": "@appear.sh/introspector",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "JavaScript introspection library",
   "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
