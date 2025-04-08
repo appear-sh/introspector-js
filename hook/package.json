@@ -1,4 +1,0 @@
-{
-  "main": "../lib/hook/index.js",
-  "types": "../lib/hook/index.d.ts"
-}

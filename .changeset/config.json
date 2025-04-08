@@ -1,0 +1,20 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@2.3.1/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": [
+    "@appear.sh/nestjs-test",
+    "@appear.sh/next-app-test",
+    "@appear.sh/express-test",
+    "@appear.sh/fastify-test",
+    "@appear.sh/test-utils"
+  ],
+  "snapshot": {
+    "useCalculatedVersion": true
+  }
+}

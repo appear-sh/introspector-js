@@ -1,0 +1,316 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Fastify Framework > should capture traces for incoming request and outgoing calls 1`] = `
+[
+  {
+    "direction": "incoming",
+    "request": {
+      "body": {
+        "contentMediaType": "application/json",
+        "contentSchema": {
+          "properties": {
+            "test": {
+              "maxLength": 4,
+              "minLength": 4,
+              "type": "string",
+            },
+          },
+          "required": [
+            "test",
+          ],
+          "type": "object",
+        },
+        "type": "string",
+      },
+      "headers": {
+        "accept": {
+          "maxLength": 3,
+          "minLength": 3,
+          "type": "string",
+        },
+        "accept-encoding": {
+          "maxLength": 13,
+          "minLength": 13,
+          "type": "string",
+        },
+        "accept-language": {
+          "maxLength": 1,
+          "minLength": 1,
+          "type": "string",
+        },
+        "connection": {
+          "maxLength": 10,
+          "minLength": 10,
+          "type": "string",
+        },
+        "content-length": {
+          "maxLength": 2,
+          "minLength": 2,
+          "type": "string",
+        },
+        "content-type": {
+          "maxLength": 16,
+          "minLength": 16,
+          "type": "string",
+        },
+        "host": {
+          "maxLength": 15,
+          "minLength": 15,
+          "type": "string",
+        },
+        "sec-fetch-mode": {
+          "maxLength": 4,
+          "minLength": 4,
+          "type": "string",
+        },
+        "user-agent": {
+          "maxLength": 4,
+          "minLength": 4,
+          "type": "string",
+        },
+      },
+      "method": "POST",
+      "query": {},
+      "uri": "http://localhost:PORT/api/test",
+    },
+    "response": {
+      "body": {
+        "contentMediaType": "text/plain",
+        "type": "string",
+      },
+      "headers": {
+        "content-type": {
+          "maxLength": 24,
+          "minLength": 24,
+          "type": "string",
+        },
+      },
+      "statusCode": 200,
+    },
+  },
+  {
+    "direction": "outgoing",
+    "request": {
+      "body": {
+        "contentMediaType": "application/json",
+        "contentSchema": {
+          "properties": {
+            "http.request": {
+              "maxLength": 12,
+              "minLength": 12,
+              "type": "string",
+            },
+            "key": {
+              "maxLength": 7,
+              "minLength": 7,
+              "type": "string",
+            },
+          },
+          "required": [
+            "http.request",
+            "key",
+          ],
+          "type": "object",
+        },
+        "type": "string",
+      },
+      "headers": {
+        "content-type": {
+          "maxLength": 16,
+          "minLength": 16,
+          "type": "string",
+        },
+        "host": {
+          "maxLength": 11,
+          "minLength": 11,
+          "type": "string",
+        },
+        "traceparent": {
+          "maxLength": 55,
+          "minLength": 55,
+          "type": "string",
+        },
+      },
+      "method": "POST",
+      "query": {},
+      "uri": "https://httpbin.org/anything",
+    },
+    "response": {
+      "body": {
+        "contentMediaType": "application/json",
+        "contentSchema": {
+          "properties": {
+            "http.request": {
+              "maxLength": 12,
+              "minLength": 12,
+              "type": "string",
+            },
+            "key": {
+              "maxLength": 7,
+              "minLength": 7,
+              "type": "string",
+            },
+          },
+          "required": [
+            "http.request",
+            "key",
+          ],
+          "type": "object",
+        },
+        "type": "string",
+      },
+      "headers": {
+        "access-control-allow-credentials": {
+          "enum": [
+            "true",
+            "false",
+          ],
+          "format": "boolean",
+          "type": "string",
+        },
+        "access-control-allow-origin": {
+          "maxLength": 1,
+          "minLength": 1,
+          "type": "string",
+        },
+        "connection": {
+          "maxLength": 10,
+          "minLength": 10,
+          "type": "string",
+        },
+        "content-length": {
+          "maxLength": 3,
+          "minLength": 3,
+          "type": "string",
+        },
+        "content-type": {
+          "maxLength": 16,
+          "minLength": 16,
+          "type": "string",
+        },
+        "date": {
+          "format": "utc-date-time",
+          "type": "string",
+        },
+        "server": {
+          "maxLength": 15,
+          "minLength": 15,
+          "type": "string",
+        },
+      },
+      "statusCode": 200,
+    },
+  },
+  {
+    "direction": "outgoing",
+    "request": {
+      "body": null,
+      "headers": {
+        "accept": {
+          "maxLength": 3,
+          "minLength": 3,
+          "type": "string",
+        },
+        "accept-encoding": {
+          "maxLength": 17,
+          "minLength": 17,
+          "type": "string",
+        },
+        "accept-language": {
+          "maxLength": 1,
+          "minLength": 1,
+          "type": "string",
+        },
+        "content-type": {
+          "maxLength": 16,
+          "minLength": 16,
+          "type": "string",
+        },
+        "sec-fetch-mode": {
+          "maxLength": 4,
+          "minLength": 4,
+          "type": "string",
+        },
+        "traceparent": {
+          "maxLength": 55,
+          "minLength": 55,
+          "type": "string",
+        },
+        "user-agent": {
+          "maxLength": 4,
+          "minLength": 4,
+          "type": "string",
+        },
+      },
+      "method": "POST",
+      "query": {},
+      "uri": "https://httpbin.org/anything",
+    },
+    "response": {
+      "body": {
+        "contentMediaType": "application/json",
+        "contentSchema": {
+          "properties": {
+            "fetch": {
+              "maxLength": 5,
+              "minLength": 5,
+              "type": "string",
+            },
+            "key": {
+              "maxLength": 7,
+              "minLength": 7,
+              "type": "string",
+            },
+          },
+          "required": [
+            "fetch",
+            "key",
+          ],
+          "type": "object",
+        },
+        "type": "string",
+      },
+      "headers": {
+        "access-control-allow-credentials": {
+          "enum": [
+            "true",
+            "false",
+          ],
+          "format": "boolean",
+          "type": "string",
+        },
+        "access-control-allow-origin": {
+          "maxLength": 1,
+          "minLength": 1,
+          "type": "string",
+        },
+        "connection": {
+          "maxLength": 10,
+          "minLength": 10,
+          "type": "string",
+        },
+        "content-length": {
+          "maxLength": 3,
+          "minLength": 3,
+          "type": "string",
+        },
+        "content-type": {
+          "maxLength": 16,
+          "minLength": 16,
+          "type": "string",
+        },
+        "date": {
+          "format": "utc-date-time",
+          "type": "string",
+        },
+        "server": {
+          "maxLength": 15,
+          "minLength": 15,
+          "type": "string",
+        },
+      },
+      "statusCode": 200,
+    },
+  },
+]
+`;
