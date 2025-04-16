@@ -1,5 +1,18 @@
 # @appear.sh/introspector
 
+## 1.1.0
+
+### Minor Changes
+
+- 36e9603: add debug option to allow easier debugging of what introspector is doing
+- 36e9603: add runtime config input validation on top of TS types
+
+### Patch Changes
+
+- 36e9603: Fix request body detection for outgoing fetch() requests
+- 36e9603: Fix handling of responses without body
+- 36e9603: Fix response body parsing for all outgoing requests
+
 ## 1.0.1
 
 ### Patch Changes
