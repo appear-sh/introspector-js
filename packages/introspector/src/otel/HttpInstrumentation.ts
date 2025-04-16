@@ -18,6 +18,8 @@ export class HttpInstrumentation extends OgHttpInstrumentation {
     super({
       ...config,
       requestHook: (span, req) => {
+        if (this.appearConfig.debug)
+          console.debug("[Appear] HTTPInstrumentation detected a request")
         this._requestHook(span, req)
         config.requestHook?.(span, req)
       },
@@ -72,6 +74,8 @@ export class HttpInstrumentation extends OgHttpInstrumentation {
         this.appearConfig,
       )
     ) {
+      if (this.appearConfig.debug)
+        console.debug(`[Appear] Request to ${request.url} was filtered out`)
       return
     }
 
@@ -93,6 +97,7 @@ export async function readIncomingMessageBody(
     [bodySymbol]?: Promise<string | null>
   },
 ): Promise<string | null> {
+  if (resReq[bodySymbol]) return resReq[bodySymbol]
   resReq[bodySymbol] = new Promise((resolve) => {
     const chunks: Buffer[] = []
 
@@ -105,14 +110,7 @@ export async function readIncomingMessageBody(
     resReq.prependListener("end", () => {
       if (chunks.length === 0) return resolve(null)
       // responses have full serialized object in data instead of just body
-      if (resReq.statusCode) {
-        // is response
-        const body = JSON.parse(Buffer.concat(chunks).toString()).json
-        resolve(JSON.stringify(body))
-      } else {
-        // is request
-        resolve(Buffer.concat(chunks).toString())
-      }
+      resolve(Buffer.concat(chunks).toString())
     })
   })
   return resReq[bodySymbol]
@@ -121,6 +119,7 @@ export async function readIncomingMessageBody(
 export function readOutgoingMessageBody(
   res: OutgoingMessage & { [bodySymbol]?: Promise<string | null> },
 ): Promise<string | null> {
+  if (res[bodySymbol]) return res[bodySymbol]
   res[bodySymbol] = new Promise((resolve) => {
     const originalWrite = res.write.bind(res)
     const originalEnd = res.end.bind(res)
@@ -139,9 +138,7 @@ export function readOutgoingMessageBody(
     }
 
     res.end = function (chunk: any, ...args: any[]): OutgoingMessage {
-      if (chunk) {
-        chunks.push(Buffer.from(chunk))
-      }
+      if (chunk) chunks.push(Buffer.from(chunk))
       resolve(Buffer.concat(chunks).toString())
 
       const encoding = args[0] || "utf8"
@@ -200,12 +197,24 @@ export async function clientRequestToRequest(
   })
 }
 
+function canHaveBody(statusCode?: number) {
+  // Status codes that should not have a body according to HTTP and Fetch API specifications
+  const statusCodesWithoutBody = [204, 205, 304]
+  if (
+    statusCode &&
+    statusCode >= 200 &&
+    !statusCodesWithoutBody.includes(statusCode)
+  ) {
+    return true
+  }
+  return false
+}
+
 export async function serverResponseToResponse(
   res: ServerResponse<IncomingMessage>,
 ): Promise<Response> {
   // MUST read the body first, as headers etc are likely sent before this.
-  let parsedBody: string | null = await readOutgoingMessageBody(res)
-
+  const body = await readOutgoingMessageBody(res)
   const headers = new Headers()
   const outgoingHeaders = res.getHeaders()
   for (const [headerName, headerValue] of Object.entries(outgoingHeaders)) {
@@ -219,13 +228,7 @@ export async function serverResponseToResponse(
     }
   }
 
-  const statusCode = res.statusCode
-
-  if (statusCode === 204) {
-    parsedBody = null
-  }
-
-  return new Response(parsedBody, {
+  return new Response(canHaveBody(res.statusCode) ? body : null, {
     status: res.statusCode,
     statusText: res.statusMessage,
     headers,
@@ -238,7 +241,7 @@ export async function incomingMessageToResponse(
   const headers = new Headers(res.headers as Record<string, string>)
   const body = await readIncomingMessageBody(res)
 
-  return new Response(body, {
+  return new Response(canHaveBody(res.statusCode) ? body : null, {
     headers,
     status: res.statusCode,
     statusText: res.statusMessage,

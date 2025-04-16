@@ -1,15 +1,18 @@
-export async function makeHttpRequest(key: string) {
+export async function makeHttpRequest(
+  key: string,
+  url: string = "https://httpbin.org/anything",
+) {
   return new Promise(async (resolve, reject) => {
     const https = await import("node:https")
     const httpRequest = https.request(
-      "https://httpbin.org/anything",
+      url,
       { method: "POST", headers: { "Content-Type": "application/json" } },
       (httpResponse) => {
         let data = ""
         httpResponse.on("data", (chunk) => {
           data += chunk
         })
-        httpResponse.on("end", () => resolve(JSON.parse(data)))
+        httpResponse.on("end", () => resolve(data))
       },
     )
     httpRequest.on("error", (error) => reject(error))
@@ -18,14 +21,20 @@ export async function makeHttpRequest(key: string) {
   })
 }
 
-export async function makeFetchRequest(key: string) {
-  return fetch("https://httpbin.org/anything", {
+export async function makeFetchRequest(
+  key: string,
+  url: string = "https://httpbin.org/anything",
+) {
+  return fetch(url, {
     method: "POST",
     body: JSON.stringify({ fetch: "fetch", key }),
     headers: { "Content-Type": "application/json" },
   })
 }
 
-export async function makeOutgoingCalls(key: string) {
-  await Promise.all([makeHttpRequest(key), makeFetchRequest(key)])
+export async function makeOutgoingCalls(
+  key: string,
+  url: string = "https://httpbin.org/anything",
+) {
+  await Promise.all([makeHttpRequest(key, url), makeFetchRequest(key, url)])
 }

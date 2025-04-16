@@ -1,5 +1,6 @@
 import { defaultInterceptFilter } from "./helpers.js"
 import { DEFAULT_REPORTING_ENDPOINT } from "./report.js"
+import { z } from "zod"
 
 export interface AppearConfig {
   /**
@@ -34,6 +35,15 @@ export interface AppearConfig {
    */
   enabled?: boolean
 
+  /**
+   * Enable debug mode which will output detailed debug information to the console,
+   * including all reported traffic, validation errors, and other diagnostic data.
+   * Useful for troubleshooting and understanding what data is being sent to Appear.
+   *
+   * @default false
+   */
+  debug?: boolean
+
   /** configuration of how often and where are data reported */
   reporting?: {
     /**
@@ -59,6 +69,25 @@ export interface AppearConfig {
   }
 }
 
+// Zod schema for AppearConfig validation
+export const AppearConfigSchema = z.object({
+  apiKey: z.string().min(1, "API key is required"),
+  environment: z.string().min(1, "Environment is required"),
+  serviceName: z.string().optional(),
+  enabled: z.boolean().optional(),
+  debug: z.boolean().optional(),
+  reporting: z
+    .object({
+      endpoint: z.string().url().optional(),
+    })
+    .optional(),
+  interception: z
+    .object({
+      filter: z.function().optional(),
+    })
+    .optional(),
+})
+
 export type ResolvedAppearConfig = Omit<
   Required<AppearConfig>,
   "reporting" | "interception" | "serviceName"
@@ -71,6 +100,7 @@ export type ResolvedAppearConfig = Omit<
 export function resolveConfig(input: AppearConfig): ResolvedAppearConfig {
   return {
     enabled: true,
+    debug: false,
     ...input,
     interception: {
       filter: defaultInterceptFilter,
