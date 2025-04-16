@@ -10,6 +10,11 @@ app.post("/api/test", async (req, res) => {
   res.json({ message: "Success", body: req.body })
 })
 
+app.post("/api/empty", async (req, res) => {
+  await makeOutgoingCalls("express", "https://httpbin.org/status/304")
+  res.json({ message: "Success" })
+})
+
 const server = app.listen(0, () => {
   const port = (server.address() as AddressInfo).port
   console.log(`Server started on port ${port}`)

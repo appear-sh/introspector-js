@@ -10,9 +10,11 @@ import { Operation, Reporter } from "../report.js"
 export class AppearExporter implements SpanExporter {
   protected pendingExports: Set<Promise<void>> = new Set()
   protected readonly reporter: Reporter
+  protected readonly debug: boolean
 
   constructor(config: AppearConfig) {
     this.reporter = new Reporter(config)
+    this.debug = config.debug || false
   }
 
   /**
@@ -24,20 +26,41 @@ export class AppearExporter implements SpanExporter {
     spans: ReadableSpan[],
     resultCallback: (result: ExportResult) => void,
   ): void {
+    console.log(`[Appear] Filtering ${spans.length} spans`)
     const operations = spans
       .map((span) => span.attributes["appear.operation"])
       .filter(Boolean)
       .map((op) => JSON.parse(op as string) as Operation)
 
+    if (operations.length === 0) return
+
+    if (this.debug) {
+      console.debug(`[Appear] Exporting ${operations.length} operations:`)
+      operations.forEach((op) =>
+        console.debug(`[Appear] Exporting operation: ${JSON.stringify(op)}`),
+      )
+    }
+
     const pendingExport = this.reporter
       .report(operations)
-      .then(() => resultCallback({ code: ExportResultCode.SUCCESS }))
-      .catch((error) =>
-        resultCallback({ code: ExportResultCode.FAILED, error }),
-      )
+      .then(() => {
+        if (this.debug)
+          console.debug(
+            `[Appear] Successfully exported ${operations.length} operations`,
+          )
+        resultCallback({ code: ExportResultCode.SUCCESS })
+      })
+      .catch((error) => {
+        if (this.debug)
+          console.error(
+            `[Appear] Failed to export ${operations.length} operations:`,
+            error,
+          )
+        resultCallback({ code: ExportResultCode.FAILED, error })
+      })
 
     this.pendingExports.add(pendingExport)
-    pendingExport.finally(() => this.pendingExports.delete)
+    pendingExport.finally(() => this.pendingExports.delete(pendingExport))
   }
 
   /**

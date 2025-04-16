@@ -12,7 +12,8 @@
       "persistent": true,
       "cache": false
     },
-    "lint": { "outputs": [] },
+    "lint": { "inputs": ["src/**"], "outputs": [] },
+    "lint:fix": { "inputs": ["src/**"], "outputs": [] },
     "test": {
       "dependsOn": ["^build"],
       "outputs": []

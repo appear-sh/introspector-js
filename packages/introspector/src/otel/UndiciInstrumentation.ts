@@ -1,24 +1,54 @@
 import { Span } from "@opentelemetry/api"
 import {
   UndiciInstrumentation as OgUndiciInstrumentation,
-  UndiciInstrumentationConfig,
-  UndiciRequest,
-  UndiciResponse,
+  type UndiciInstrumentationConfig,
+  type UndiciRequest as OgUndiciRequest,
+  type UndiciResponse,
 } from "@opentelemetry/instrumentation-undici"
 import { AppearConfig, resolveConfig, ResolvedAppearConfig } from "../config.js"
 import { process } from "../process.js"
+import { Readable } from "node:stream"
+
+const bodySymbol = Symbol("body")
+
+type UndiciRequest = OgUndiciRequest & {
+  [bodySymbol]?: Buffer[] | null
+}
 
 export class UndiciInstrumentation extends OgUndiciInstrumentation {
   protected appearConfig: ResolvedAppearConfig
   constructor(config: UndiciInstrumentationConfig & AppearConfig) {
     super({
       ...config,
+      requestHook: async (span, req) => {
+        this._requestHook(span, req)
+        config.requestHook?.(span, req)
+      },
       responseHook: async (span, res) => {
+        if (this.appearConfig.debug)
+          console.debug("[Appear] UndiciInstrumentation detected a request")
         this._responseHook(span, res)
         config.responseHook?.(span, res)
       },
     })
     this.appearConfig = resolveConfig(config)
+  }
+
+  // hook into request before it's sent so we can grab body
+  protected _requestHook(span: Span, request: UndiciRequest): void {
+    request[bodySymbol] = null
+    if (!request.body) return
+
+    const ogBodyGenerator = request.body
+    request[bodySymbol] = []
+
+    // Create a new generator that will grab chunks and yield them again
+    request.body = (async function* () {
+      for await (const chunk of ogBodyGenerator) {
+        request[bodySymbol]?.push(chunk)
+        yield chunk
+      }
+    })()
   }
 
   protected _responseHook(
@@ -53,7 +83,10 @@ export class UndiciInstrumentation extends OgUndiciInstrumentation {
     const ogOnComplete = handler.onComplete
     handler.onComplete = (...args: any[]) => {
       try {
-        const request = this.undiciRequestToRequest(undici.request)
+        const request = this.undiciRequestToRequest(
+          undici.request[bodySymbol],
+          undici.request,
+        )
         const response = this.undiciResponseToResponse(
           Buffer.concat(data),
           undici.response,
@@ -65,8 +98,11 @@ export class UndiciInstrumentation extends OgUndiciInstrumentation {
             response,
             this.appearConfig,
           )
-        )
+        ) {
+          if (this.appearConfig.debug)
+            console.debug(`[Appear] Request to ${request.url} was filtered out`)
           return
+        }
 
         process({
           request,
@@ -76,19 +112,34 @@ export class UndiciInstrumentation extends OgUndiciInstrumentation {
           .then((operation) => {
             span.setAttribute("appear.operation", JSON.stringify(operation))
           })
+          .catch((err) => {
+            if (this.appearConfig.debug)
+              console.error(
+                `[Appear] Error processing request`,
+                err,
+                request,
+                response,
+              )
+          })
           .finally(() => endSpan.apply(span, [spanEndTime]))
-      } catch (e) {}
+      } catch (e) {
+        if (this.appearConfig.debug)
+          console.error(`[Appear] Error processing request`, e, undici)
+      }
       return ogOnComplete.apply(handler, args)
     }
   }
 
-  protected undiciRequestToRequest(undiciRequest: UndiciRequest): Request {
+  protected undiciRequestToRequest(
+    data: Buffer[] | null | undefined,
+    undiciRequest: UndiciRequest,
+  ): Request {
     const url = new URL(undiciRequest.path, undiciRequest.origin)
 
     return new Request(url, {
       method: undiciRequest.method,
       headers: this.readUndiciHeaders(undiciRequest.headers),
-      body: undiciRequest.body,
+      body: data ? Buffer.concat(data) : null,
       // @ts-ignore
       duplex: "half",
     })
@@ -98,8 +149,7 @@ export class UndiciInstrumentation extends OgUndiciInstrumentation {
     data: Buffer,
     undiciResponse: UndiciResponse,
   ): Response {
-    const body = JSON.parse(data.toString()).json
-    return new Response(JSON.stringify(body), {
+    return new Response(data?.toString() || null, {
       status: undiciResponse.statusCode,
       statusText: undiciResponse.statusText,
       headers: this.readUndiciHeaders(undiciResponse.headers),

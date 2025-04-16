@@ -40,4 +40,17 @@ describe("Express Framework", () => {
       expect(formattedOperations).toHaveLength(3)
     },
   )
+
+  it(
+    "should handle empty responses gracefully",
+    { timeout: 30000 },
+    async () => {
+      const { response } = await makeTestRequest(server.port, "/api/empty")
+      expect(response.status).toBe(200)
+      const operations = await collector.waitForOperations(3, 30000)
+      const formattedOperations = formatTraceOperations(operations)
+      expect(formattedOperations).toMatchSnapshot()
+      expect(formattedOperations).toHaveLength(3)
+    },
+  )
 })

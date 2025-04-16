@@ -95,9 +95,9 @@ exports[`Fastify Framework > should capture traces for incoming request and outg
         "contentMediaType": "application/json",
         "contentSchema": {
           "properties": {
-            "http.request": {
-              "maxLength": 12,
-              "minLength": 12,
+            "fetch": {
+              "maxLength": 5,
+              "minLength": 5,
               "type": "string",
             },
             "key": {
@@ -107,7 +107,7 @@ exports[`Fastify Framework > should capture traces for incoming request and outg
             },
           },
           "required": [
-            "http.request",
+            "fetch",
             "key",
           ],
           "type": "object",
@@ -115,19 +115,39 @@ exports[`Fastify Framework > should capture traces for incoming request and outg
         "type": "string",
       },
       "headers": {
+        "accept": {
+          "maxLength": 3,
+          "minLength": 3,
+          "type": "string",
+        },
+        "accept-encoding": {
+          "maxLength": 17,
+          "minLength": 17,
+          "type": "string",
+        },
+        "accept-language": {
+          "maxLength": 1,
+          "minLength": 1,
+          "type": "string",
+        },
         "content-type": {
           "maxLength": 16,
           "minLength": 16,
           "type": "string",
         },
-        "host": {
-          "maxLength": 11,
-          "minLength": 11,
+        "sec-fetch-mode": {
+          "maxLength": 4,
+          "minLength": 4,
           "type": "string",
         },
         "traceparent": {
           "maxLength": 55,
           "minLength": 55,
+          "type": "string",
+        },
+        "user-agent": {
+          "maxLength": 4,
+          "minLength": 4,
           "type": "string",
         },
       },
@@ -140,20 +160,136 @@ exports[`Fastify Framework > should capture traces for incoming request and outg
         "contentMediaType": "application/json",
         "contentSchema": {
           "properties": {
-            "http.request": {
+            "args": {
+              "properties": {},
+              "required": [],
+              "type": "object",
+            },
+            "data": {
+              "maxLength": 33,
+              "minLength": 33,
+              "type": "string",
+            },
+            "files": {
+              "properties": {},
+              "required": [],
+              "type": "object",
+            },
+            "form": {
+              "properties": {},
+              "required": [],
+              "type": "object",
+            },
+            "headers": {
+              "properties": {
+                "Accept": {
+                  "maxLength": 3,
+                  "minLength": 3,
+                  "type": "string",
+                },
+                "Accept-Encoding": {
+                  "maxLength": 17,
+                  "minLength": 17,
+                  "type": "string",
+                },
+                "Accept-Language": {
+                  "maxLength": 1,
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "Content-Length": {
+                  "maxLength": 2,
+                  "minLength": 2,
+                  "type": "string",
+                },
+                "Content-Type": {
+                  "maxLength": 16,
+                  "minLength": 16,
+                  "type": "string",
+                },
+                "Host": {
+                  "format": "filename",
+                  "type": "string",
+                },
+                "Sec-Fetch-Mode": {
+                  "maxLength": 4,
+                  "minLength": 4,
+                  "type": "string",
+                },
+                "Traceparent": {
+                  "maxLength": 55,
+                  "minLength": 55,
+                  "type": "string",
+                },
+                "User-Agent": {
+                  "maxLength": 4,
+                  "minLength": 4,
+                  "type": "string",
+                },
+                "X-Amzn-Trace-Id": {
+                  "maxLength": 40,
+                  "minLength": 40,
+                  "type": "string",
+                },
+              },
+              "required": [
+                "Accept",
+                "Accept-Encoding",
+                "Accept-Language",
+                "Content-Length",
+                "Content-Type",
+                "Host",
+                "Sec-Fetch-Mode",
+                "Traceparent",
+                "User-Agent",
+                "X-Amzn-Trace-Id",
+              ],
+              "type": "object",
+            },
+            "json": {
+              "properties": {
+                "fetch": {
+                  "maxLength": 5,
+                  "minLength": 5,
+                  "type": "string",
+                },
+                "key": {
+                  "maxLength": 7,
+                  "minLength": 7,
+                  "type": "string",
+                },
+              },
+              "required": [
+                "fetch",
+                "key",
+              ],
+              "type": "object",
+            },
+            "method": {
+              "maxLength": 4,
+              "minLength": 4,
+              "type": "string",
+            },
+            "origin": {
               "maxLength": 12,
               "minLength": 12,
               "type": "string",
             },
-            "key": {
-              "maxLength": 7,
-              "minLength": 7,
+            "url": {
+              "format": "uri",
               "type": "string",
             },
           },
           "required": [
-            "http.request",
-            "key",
+            "args",
+            "data",
+            "files",
+            "form",
+            "headers",
+            "json",
+            "method",
+            "origin",
+            "url",
           ],
           "type": "object",
         },
@@ -204,41 +340,43 @@ exports[`Fastify Framework > should capture traces for incoming request and outg
   {
     "direction": "outgoing",
     "request": {
-      "body": null,
+      "body": {
+        "contentMediaType": "application/json",
+        "contentSchema": {
+          "properties": {
+            "http.request": {
+              "maxLength": 12,
+              "minLength": 12,
+              "type": "string",
+            },
+            "key": {
+              "maxLength": 7,
+              "minLength": 7,
+              "type": "string",
+            },
+          },
+          "required": [
+            "http.request",
+            "key",
+          ],
+          "type": "object",
+        },
+        "type": "string",
+      },
       "headers": {
-        "accept": {
-          "maxLength": 3,
-          "minLength": 3,
-          "type": "string",
-        },
-        "accept-encoding": {
-          "maxLength": 17,
-          "minLength": 17,
-          "type": "string",
-        },
-        "accept-language": {
-          "maxLength": 1,
-          "minLength": 1,
-          "type": "string",
-        },
         "content-type": {
           "maxLength": 16,
           "minLength": 16,
           "type": "string",
         },
-        "sec-fetch-mode": {
-          "maxLength": 4,
-          "minLength": 4,
+        "host": {
+          "maxLength": 11,
+          "minLength": 11,
           "type": "string",
         },
         "traceparent": {
           "maxLength": 55,
           "minLength": 55,
-          "type": "string",
-        },
-        "user-agent": {
-          "maxLength": 4,
-          "minLength": 4,
           "type": "string",
         },
       },
@@ -251,20 +389,106 @@ exports[`Fastify Framework > should capture traces for incoming request and outg
         "contentMediaType": "application/json",
         "contentSchema": {
           "properties": {
-            "fetch": {
-              "maxLength": 5,
-              "minLength": 5,
+            "args": {
+              "properties": {},
+              "required": [],
+              "type": "object",
+            },
+            "data": {
+              "maxLength": 47,
+              "minLength": 47,
               "type": "string",
             },
-            "key": {
-              "maxLength": 7,
-              "minLength": 7,
+            "files": {
+              "properties": {},
+              "required": [],
+              "type": "object",
+            },
+            "form": {
+              "properties": {},
+              "required": [],
+              "type": "object",
+            },
+            "headers": {
+              "properties": {
+                "Content-Length": {
+                  "maxLength": 2,
+                  "minLength": 2,
+                  "type": "string",
+                },
+                "Content-Type": {
+                  "maxLength": 16,
+                  "minLength": 16,
+                  "type": "string",
+                },
+                "Host": {
+                  "format": "filename",
+                  "type": "string",
+                },
+                "Traceparent": {
+                  "maxLength": 55,
+                  "minLength": 55,
+                  "type": "string",
+                },
+                "X-Amzn-Trace-Id": {
+                  "maxLength": 40,
+                  "minLength": 40,
+                  "type": "string",
+                },
+              },
+              "required": [
+                "Content-Length",
+                "Content-Type",
+                "Host",
+                "Traceparent",
+                "X-Amzn-Trace-Id",
+              ],
+              "type": "object",
+            },
+            "json": {
+              "properties": {
+                "http.request": {
+                  "maxLength": 12,
+                  "minLength": 12,
+                  "type": "string",
+                },
+                "key": {
+                  "maxLength": 7,
+                  "minLength": 7,
+                  "type": "string",
+                },
+              },
+              "required": [
+                "http.request",
+                "key",
+              ],
+              "type": "object",
+            },
+            "method": {
+              "maxLength": 4,
+              "minLength": 4,
+              "type": "string",
+            },
+            "origin": {
+              "maxLength": 12,
+              "minLength": 12,
+              "type": "string",
+            },
+            "url": {
+              "format": "uri",
               "type": "string",
             },
           },
           "required": [
-            "fetch",
-            "key",
+            "args",
+            "data",
+            "files",
+            "form",
+            "headers",
+            "json",
+            "method",
+            "origin",
+            "url",
           ],
           "type": "object",
         },
