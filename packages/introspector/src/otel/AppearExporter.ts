@@ -26,7 +26,9 @@ export class AppearExporter implements SpanExporter {
     spans: ReadableSpan[],
     resultCallback: (result: ExportResult) => void,
   ): void {
-    console.log(`[Appear] Filtering ${spans.length} spans`)
+    if (this.debug) {
+      console.log(`[Appear] Processing and filtering ${spans.length} spans`)
+    }
     const operations = spans
       .map((span) => span.attributes["appear.operation"])
       .filter(Boolean)
@@ -67,6 +69,7 @@ export class AppearExporter implements SpanExporter {
    * Shutdown the exporter.
    */
   async shutdown(): Promise<void> {
+    this.reporter.shutdown()
     return this.forceFlush()
   }
 
