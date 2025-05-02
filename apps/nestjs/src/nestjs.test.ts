@@ -1,10 +1,11 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest"
 import {
+  didReceivePing,
   formatTraceOperations,
   makeTestRequest,
   MockCollector,
   startFrameworkServer,
 } from "@appear.sh/test-utils"
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest"
 
 describe("NestJS App", () => {
   let collector: MockCollector
@@ -24,7 +25,7 @@ describe("NestJS App", () => {
     server?.stop()
   })
 
-  beforeEach(() => {
+  afterEach(() => {
     collector.clearTraces()
   })
 
@@ -35,6 +36,7 @@ describe("NestJS App", () => {
       const { response, data } = await makeTestRequest(server.port)
       expect(response.status).toBe(200)
       const operations = await collector.waitForOperations(3, 30000)
+      expect(didReceivePing(collector.getTraces())).toBe(true)
       const formattedOperations = formatTraceOperations(operations)
       expect(formattedOperations).toMatchSnapshot()
       expect(formattedOperations).toHaveLength(3)

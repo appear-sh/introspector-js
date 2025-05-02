@@ -4,7 +4,7 @@ import type { AddressInfo } from "net"
 export class MockCollector {
   private server: any
   private port: number = 0
-  private traces: { operations: any[] }[] = []
+  private traces: { endpoint: string; operations?: any[] }[] = []
 
   async start() {
     return new Promise<void>((resolve) => {
@@ -15,6 +15,7 @@ export class MockCollector {
           req.on("end", () => {
             try {
               const trace = JSON.parse(body)
+              trace.endpoint = req.url
               this.traces.push(trace)
               res.writeHead(200)
               res.end()
@@ -62,7 +63,10 @@ export class MockCollector {
 
     try {
       while (true) {
-        const operations = this.traces.map((trace) => trace.operations).flat()
+        const operations = this.traces
+          .map((trace) => trace.operations)
+          .flat()
+          .filter(Boolean)
         if (operations.length >= count) return operations
         await new Promise((resolve) => setTimeout(resolve, 100))
       }

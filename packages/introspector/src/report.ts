@@ -1,10 +1,10 @@
+import stringify from "fast-json-stable-stringify"
+import xxhash from "xxhashjs"
 import { AppearConfig, resolveConfig } from "./config.js"
 import {
   SomeSchemaType,
   StringSchemaType,
 } from "./contentTypes/jsonSchema.types.js"
-import xxhash from "xxhashjs"
-import stringify from "fast-json-stable-stringify"
 // Get version from package.json
 // @ts-ignore - This is a dynamic require that TypeScript doesn't understand
 const packageJson = require("../package.json")
@@ -52,9 +52,15 @@ export type Report = {
 export class Reporter {
   private reportedOperationHashes: Set<string> = new Set()
   private config: ReturnType<typeof resolveConfig>
+  private pingInterval: NodeJS.Timeout | undefined
 
   constructor(config: AppearConfig) {
     this.config = resolveConfig(config)
+
+    if (this.config.serviceName) {
+      this.ping()
+      this.pingInterval = setInterval(() => this.ping(), 1000 * 60 * 5) // 5 minutes
+    }
   }
 
   async report(operations: Operation[]): Promise<boolean> {
@@ -100,5 +106,38 @@ export class Reporter {
       )
     }
     return false
+  }
+
+  async ping() {
+    const base = this.config.reporting.endpoint
+    const url = new URL("ping", `${base}${base.endsWith("/") ? "" : "/"}`)
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-API-Key": this.config.apiKey,
+          "X-Appear-Runtime": "nodejs",
+          "X-Appear-Introspector-Version": packageJson.version,
+        },
+        body: JSON.stringify({
+          reporter: {
+            serviceName: this.config.serviceName,
+            environment: this.config.environment,
+          },
+        }),
+      })
+      return response.ok
+    } catch (error) {
+      console.error(`[Appear introspector] failed to ping with error ${error}`)
+    }
+    return false
+  }
+
+  shutdown() {
+    if (this.pingInterval) {
+      clearInterval(this.pingInterval)
+      this.pingInterval = undefined
+    }
   }
 }

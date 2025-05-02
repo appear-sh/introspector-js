@@ -5,6 +5,7 @@ import { registerAppear } from "@appear.sh/introspector/node"
 registerAppear({
   apiKey: "test-key",
   environment: "test",
+  serviceName: "nestjs-test",
   reporting: { endpoint: process.env.COLLECTOR_URL },
 })
 
