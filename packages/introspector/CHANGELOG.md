@@ -1,5 +1,15 @@
 # @appear.sh/introspector
 
+## 1.2.0
+
+### Minor Changes
+
+- bb6d82d: Add health check to the introspector to allow for more acurate reading of it's status.
+
+### Patch Changes
+
+- bb6d82d: Remove extra console.log which showed "[Appear] Filtering X spans"
+
 ## 1.1.0
 
 ### Minor Changes
