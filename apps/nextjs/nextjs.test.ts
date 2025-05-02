@@ -1,10 +1,11 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest"
 import {
+  didReceivePing,
   formatTraceOperations,
   makeTestRequest,
   MockCollector,
   startFrameworkServer,
 } from "@appear.sh/test-utils"
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest"
 
 describe("Next.js", () => {
   let collector: MockCollector
@@ -24,8 +25,13 @@ describe("Next.js", () => {
     server?.stop()
   })
 
-  beforeEach(() => {
+  afterEach(() => {
     collector.clearTraces()
+  })
+
+  it("should send ping", async () => {
+    const traces = collector.getTraces()
+    expect(didReceivePing(traces)).toBe(true)
   })
 
   it(

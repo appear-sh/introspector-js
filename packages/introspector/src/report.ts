@@ -1,10 +1,10 @@
+import stringify from "fast-json-stable-stringify"
+import xxhash from "xxhashjs"
 import { AppearConfig, resolveConfig } from "./config.js"
 import {
   SomeSchemaType,
   StringSchemaType,
 } from "./contentTypes/jsonSchema.types.js"
-import xxhash from "xxhashjs"
-import stringify from "fast-json-stable-stringify"
 // Get version from package.json
 // @ts-ignore - This is a dynamic require that TypeScript doesn't understand
 const packageJson = require("../package.json")
@@ -57,7 +57,7 @@ export class Reporter {
   constructor(config: AppearConfig) {
     this.config = resolveConfig(config)
 
-    if (config.serviceName) {
+    if (this.config.serviceName) {
       this.ping()
       this.pingInterval = setInterval(() => this.ping(), 1000 * 60 * 5) // 5 minutes
     }
@@ -128,7 +128,9 @@ export class Reporter {
         }),
       })
       return response.ok
-    } catch (error) {}
+    } catch (error) {
+      console.error(`[Appear introspector] failed to ping with error ${error}`)
+    }
     return false
   }
 
