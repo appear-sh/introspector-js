@@ -15,7 +15,7 @@ export const defaultInterceptFilter = (
   // Probably something we don't care about, ignore.
   if (request.destination !== "") return false
   // ignore reports to Appear
-  if (request.url === config.reporting.endpoint) return false
+  if (request.url.includes(config.reporting.endpoint)) return false
 
   return true
 }
