@@ -1,5 +1,11 @@
 # @appear.sh/introspector
 
+## 1.2.1
+
+### Patch Changes
+
+- 08fcdc3: FIX: default reporting filter to ignore Appear /report/ping calls
+
 ## 1.2.0
 
 ### Minor Changes
