@@ -49,9 +49,6 @@ describe("Next.js", () => {
       const formattedOperations = formatTraceOperations(operations)
 
       expect(formattedOperations).toMatchSnapshot()
-      // todo this should be 3
-      // but introspector currently doesn't support incoming calls for next.js
-      // because the instrumentaiton hook is incompatible with otel instrumentation-http
       expect(formattedOperations).toHaveLength(3)
     },
   )
@@ -71,9 +68,6 @@ describe("Next.js", () => {
       const formattedOperations = formatTraceOperations(operations)
 
       expect(formattedOperations).toMatchSnapshot()
-      // todo this should be 3
-      // but introspector currently doesn't support incoming calls for next.js
-      // because the instrumentaiton hook with pages router currently doesn't support outgoing calls
       expect(formattedOperations).toHaveLength(3)
     },
   )
