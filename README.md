@@ -280,6 +280,15 @@ export interface AppearConfig {
    */
   enabled?: boolean
 
+  /**
+   * Enable debug mode which will output detailed debug information to the console,
+   * including all reported traffic, validation errors, and other diagnostic data.
+   * Useful for troubleshooting and understanding what data is being sent to Appear.
+   *
+   * @default false
+   */
+  debug?: boolean
+
   /** configuration of how often and where data are reported */
   reporting?: {
     /**
