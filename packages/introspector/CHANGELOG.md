@@ -1,5 +1,12 @@
 # @appear.sh/introspector
 
+## 1.2.2
+
+### Patch Changes
+
+- 20b86c7: Support json parsing even if content-type header is not set
+- 20b86c7: Improve support for proxied requests by respecting X-Forwarded-\* headers
+
 ## 1.2.1
 
 ### Patch Changes
