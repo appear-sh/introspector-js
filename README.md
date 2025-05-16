@@ -89,33 +89,21 @@ registerAppear({
 
 #### Next.js
 
-_[Example](https://github.com/appear-sh/introspector-js/tree/main/apps/nextjs)_
+_[Example with instrumentation.ts](https://github.com/appear-sh/introspector-js/tree/main/apps/nextjs-instrumentation-ts)_
+_[Example with --import hook](https://github.com/appear-sh/introspector-js/tree/main/apps/nextjs)_
 
-**Hosted on Vercel and other serverless platforms**
-
-Unfortunately, Next.js when hosted on Vercel and other serverless platforms doesn't have a good way to instrument API routes in a way that would allow us to properly detect traffic. Even the [instrumentation.ts](https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation) doesn't fully work with OpenTelemetry as expected
-
-In these scenarios please follow [Custom Integration](#custom-integration) guide to create a wrapper around API route handlers.
-
-**Self-Hosted as service using `next start`**
-
-1. create `appear.js` file with
+1. create or update `instrumentation.ts` file according to [Next.js docs](https://nextjs.org/docs/app/guides/instrumentation)
 
 ```ts
-import { registerAppear } from "@appear.sh/introspector/node"
-
-registerAppear({
-  apiKey: process.env.APPEAR_REPORTING_KEY,
-  environment: process.env.NODE_ENV,
-  serviceName: "User Service", // name of the service you're instrumenting (optional)
-})
-```
-
-2. Update your start script and pass `NODE_OPTIONS` variable to register appear hook.
-
-```json
-"scripts": {
-  "start": "NODE_OPTIONS='--import ./appear.js' next start"
+export const register = async () => {
+  if (process.env.NEXT_RUNTIME === "nodejs") {
+    const { registerAppear } = await import("@appear.sh/introspector/node")
+    registerAppear({
+      apiKey: process.env.APPEAR_REPORTING_KEY,
+      environment: process.env.NODE_ENV,
+      serviceName: "User Service",
+    })
+  }
 }
 ```
 
@@ -291,6 +279,15 @@ export interface AppearConfig {
    * @default true
    */
   enabled?: boolean
+
+  /**
+   * Enable debug mode which will output detailed debug information to the console,
+   * including all reported traffic, validation errors, and other diagnostic data.
+   * Useful for troubleshooting and understanding what data is being sent to Appear.
+   *
+   * @default false
+   */
+  debug?: boolean
 
   /** configuration of how often and where data are reported */
   reporting?: {

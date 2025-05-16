@@ -163,6 +163,80 @@ importers:
         specifier: ^3.1.1
         version: 3.1.1(@types/node@22.14.0)(jsdom@26.0.0)(terser@5.39.0)
 
+  apps/nextjs-docker:
+    dependencies:
+      '@appear.sh/introspector':
+        specifier: workspace:*
+        version: link:../../packages/introspector
+      '@appear.sh/test-utils':
+        specifier: workspace:*
+        version: link:../../packages/test-utils
+      next:
+        specifier: ^15.2.4
+        version: 15.2.4(@opentelemetry/api@1.9.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      react:
+        specifier: ^19.1.0
+        version: 19.1.0
+      react-dom:
+        specifier: ^19.1.0
+        version: 19.1.0(react@19.1.0)
+    devDependencies:
+      '@types/node':
+        specifier: ^22.14.0
+        version: 22.14.0
+      '@types/react':
+        specifier: ^19.1.0
+        version: 19.1.0
+      '@types/react-dom':
+        specifier: ^19.1.1
+        version: 19.1.1(@types/react@19.1.0)
+      prettier:
+        specifier: ^3.5.3
+        version: 3.5.3
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
+      vitest:
+        specifier: ^3.1.1
+        version: 3.1.1(@types/node@22.14.0)(jsdom@26.0.0)(terser@5.39.0)
+
+  apps/nextjs-instrumentation-ts:
+    dependencies:
+      '@appear.sh/introspector':
+        specifier: workspace:*
+        version: link:../../packages/introspector
+      '@appear.sh/test-utils':
+        specifier: workspace:*
+        version: link:../../packages/test-utils
+      next:
+        specifier: ^15.2.4
+        version: 15.2.4(@opentelemetry/api@1.9.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      react:
+        specifier: ^19.1.0
+        version: 19.1.0
+      react-dom:
+        specifier: ^19.1.0
+        version: 19.1.0(react@19.1.0)
+    devDependencies:
+      '@types/node':
+        specifier: ^22.14.0
+        version: 22.14.0
+      '@types/react':
+        specifier: ^19.1.0
+        version: 19.1.0
+      '@types/react-dom':
+        specifier: ^19.1.1
+        version: 19.1.1(@types/react@19.1.0)
+      prettier:
+        specifier: ^3.5.3
+        version: 3.5.3
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
+      vitest:
+        specifier: ^3.1.1
+        version: 3.1.1(@types/node@22.14.0)(jsdom@26.0.0)(terser@5.39.0)
+
   packages/introspector:
     dependencies:
       '@opentelemetry/api':

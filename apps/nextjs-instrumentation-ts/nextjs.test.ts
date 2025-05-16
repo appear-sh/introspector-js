@@ -18,6 +18,8 @@ describe("Next.js", () => {
 
     // Start framework server in a separate process
     server = await startFrameworkServer(collector.getUrl(), /localhost:(\d+)/)
+    // in this scenario it takes a moment for server to be able to receive requests
+    await new Promise((resolve) => setTimeout(resolve, 1000))
   }, 60000)
 
   afterAll(() => {
