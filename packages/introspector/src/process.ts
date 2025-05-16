@@ -54,9 +54,11 @@ const getBodySchema = async (input: Request | Response) => {
 const parseUrl = (request: Request) => {
   const urlObject = new URL(request.url, "http://localhost")
 
-  if (request.headers.get("x-forwarded-host")) {
-    urlObject.host = request.headers.get("x-forwarded-host")!
-  }
+  urlObject.host =
+    request.headers.get("x-forwarded-host") ||
+    request.headers.get("host") ||
+    urlObject.host
+
   if (request.headers.get("x-forwarded-proto")) {
     urlObject.protocol = request.headers.get("x-forwarded-proto")!
   }

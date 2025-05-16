@@ -38,6 +38,18 @@ describe("process", () => {
       })
       expect(op.request.uri).toBe("https://example.com/api/test")
     })
+
+    it("should use host header if it's set", async () => {
+      const req = new Request("http://127.0.0.1:3000/api/test?foo=bar", {
+        headers: { host: "example.com:4000" },
+      })
+      const op = await process({
+        request: req,
+        response: new Response(),
+        direction: "incoming",
+      })
+      expect(op.request.uri).toBe("http://example.com:4000/api/test")
+    })
   })
 
   describe("body schema", () => {
