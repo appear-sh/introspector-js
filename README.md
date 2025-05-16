@@ -102,6 +102,15 @@ export const register = async () => {
       apiKey: process.env.APPEAR_REPORTING_KEY,
       environment: process.env.NODE_ENV,
       serviceName: "User Service",
+      interception: {
+        filter: (request, response, config) => {
+          // extended filter which ensures internal next requests are not shown
+          return (
+            !request.url.includes("/_next/") &&
+            defaultInterceptFilter(request, response, config)
+          )
+        },
+      },
     })
   }
 }
@@ -302,9 +311,10 @@ export interface AppearConfig {
 
   interception?: {
     /**
-     * Optional function that allows to filter what request/response pair is getting analyzed and reported
+     * Optional function that allows to filter what request/response pair is getting analyzed and reported.
+     * You can reuse default filter by importing it from `import { defaultInterceptFilter } from "@appear.sh/introspector" and using it inside the function`
      *
-     * @default (req, req, config) => req.destination === "" && request.url !== config.reporting.endpoint
+     * @default (req, req, config) => req.destination === "" && !request.url.includes(config.reporting.endpoint)
      */
     filter?: (
       request: Request,
