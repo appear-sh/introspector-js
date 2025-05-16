@@ -13,13 +13,16 @@ const getBodySchema = async (input: Request | Response) => {
     ?.split(";")[0]
     ?.trim()
 
-  if (/application\/(?:.*\+)?json/.test(contentMediaType ?? "")) {
+  if (
+    !contentMediaType ||
+    /application\/(?:.*\+)?json/.test(contentMediaType)
+  ) {
     // application/json;
     // application/something+json;
     // application/vnd.something-other+json;
 
-    // We need to try/catch the `.json()` call because even though the
-    // content-type is application/json the body might not be valid json.
+    // we opportunistically try to parse the body as json even if the content-type is not set
+    // because it's not uncommon for APIs not to set any content-type and just send a json body
     try {
       const jsonBody = await clone.json()
       const contentSchema = schemaFromValue(jsonBody, "in:body")
@@ -31,7 +34,6 @@ const getBodySchema = async (input: Request | Response) => {
       }
     } catch (e) {
       // Ignore this request.
-      // TODO: Eventually log this as an error.
       return null
     }
   } else if (/application\/(?:.*\+)?xml/.test(contentMediaType ?? "")) {
@@ -47,6 +49,25 @@ const getBodySchema = async (input: Request | Response) => {
 
   // unknown type
   return null
+}
+
+const parseUrl = (request: Request) => {
+  const urlObject = new URL(request.url, "http://localhost")
+
+  if (request.headers.get("x-forwarded-host")) {
+    urlObject.host = request.headers.get("x-forwarded-host")!
+  }
+  if (request.headers.get("x-forwarded-proto")) {
+    urlObject.protocol = request.headers.get("x-forwarded-proto")!
+  }
+  if (request.headers.get("x-forwarded-port")) {
+    urlObject.port = request.headers.get("x-forwarded-port")!
+  }
+  if (urlObject.hostname === "127.0.0.1") {
+    urlObject.hostname = "localhost"
+  }
+
+  return urlObject
 }
 
 export const process = async ({
@@ -79,9 +100,9 @@ export const process = async ({
     })
     .filter(isNonNullable)
 
-  const query = [
-    ...new URL(request.url, "http://localhost").searchParams.entries(),
-  ]
+  const urlObject = parseUrl(request)
+
+  const query = [...urlObject.searchParams.entries()]
     .map(([name, value]) => {
       const schema = schemaFromValue(value, "in:query")
       return schema ? [name, schema] : undefined
@@ -92,7 +113,7 @@ export const process = async ({
     direction,
     request: {
       method: request.method,
-      uri: request.url.split("?")[0]!, // remove query so we don't send raw values
+      uri: urlObject.href.split("?")[0]!,
       headers: Object.fromEntries(requestHeadersSchemaEntries),
       query: Object.fromEntries(query),
       body: requestBody,
