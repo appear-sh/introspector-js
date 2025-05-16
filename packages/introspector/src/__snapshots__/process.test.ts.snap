@@ -1,0 +1,77 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`process > body schema > should process a simple JSON request/response 1`] = `
+{
+  "direction": "incoming",
+  "request": {
+    "body": {
+      "contentMediaType": "application/json",
+      "contentSchema": {
+        "properties": {
+          "hello": {
+            "maxLength": 5,
+            "minLength": 5,
+            "type": "string",
+          },
+        },
+        "required": [
+          "hello",
+        ],
+        "type": "object",
+      },
+      "type": "string",
+    },
+    "headers": {
+      "content-type": {
+        "maxLength": 16,
+        "minLength": 16,
+        "type": "string",
+      },
+      "x-custom": {
+        "maxLength": 3,
+        "minLength": 3,
+        "type": "string",
+      },
+    },
+    "method": "POST",
+    "query": {
+      "foo": {
+        "maxLength": 3,
+        "minLength": 3,
+        "type": "string",
+      },
+    },
+    "uri": "http://localhost:3000/api/test",
+  },
+  "response": {
+    "body": {
+      "contentMediaType": "application/json",
+      "contentSchema": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+          },
+        },
+        "required": [
+          "ok",
+        ],
+        "type": "object",
+      },
+      "type": "string",
+    },
+    "headers": {
+      "content-type": {
+        "maxLength": 16,
+        "minLength": 16,
+        "type": "string",
+      },
+      "x-res": {
+        "maxLength": 3,
+        "minLength": 3,
+        "type": "string",
+      },
+    },
+    "statusCode": 200,
+  },
+}
+`;
