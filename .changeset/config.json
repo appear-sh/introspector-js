@@ -10,6 +10,8 @@
   "ignore": [
     "@appear.sh/nestjs-test",
     "@appear.sh/nextjs-test",
+    "@appear.sh/nextjs-docker-test",
+    "@appear.sh/nextjs-instrumentation-ts-test",
     "@appear.sh/express-test",
     "@appear.sh/fastify-test",
     "@appear.sh/test-utils"
