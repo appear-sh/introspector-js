@@ -1,5 +1,17 @@
 # @appear.sh/introspector
 
+## 1.3.0
+
+### Minor Changes
+
+- 01de3e8: Add Next.js instrumentation preset to allow for simpler setup with reduced noise.
+
+  To use new preset simply update your import to point to new `/nextjs` entrypoint.
+
+  ```ts
+  import { registerAppear } from "@appear.sh/instrumentation/nextjs"
+  ```
+
 ## 1.2.2
 
 ### Patch Changes
