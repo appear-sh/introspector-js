@@ -38,6 +38,16 @@
         "types": "./dist/node.d.ts",
         "default": "./dist/node.js"
       }
+    },
+    "./nextjs": {
+      "import": {
+        "import": "./dist/nextjs.mjs",
+        "types": "./dist/nextjs.d.mts"
+      },
+      "default": {
+        "types": "./dist/nextjs.d.ts",
+        "default": "./dist/nextjs.js"
+      }
     }
   },
   "scripts": {
