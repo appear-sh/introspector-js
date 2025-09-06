@@ -1,4 +1,4 @@
-import { registerAppear } from "@appear.sh/introspector/node"
+import { registerAppear } from "@appear.sh/introspector/nextjs"
 
 registerAppear({
   apiKey: "test-key",

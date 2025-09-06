@@ -1,7 +1,6 @@
-
 export const register = async () => {
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    const { registerAppear } = await import("@appear.sh/introspector/node")
+    const { registerAppear } = await import("@appear.sh/introspector/nextjs")
     registerAppear({
       apiKey: "test-key",
       environment: "test",

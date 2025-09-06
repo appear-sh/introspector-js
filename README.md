@@ -97,24 +97,19 @@ _[Example with --import hook](https://github.com/appear-sh/introspector-js/tree/
 ```ts
 export const register = async () => {
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    const { registerAppear } = await import("@appear.sh/introspector/node")
+    // notice import from /nextjs entrypoint which comes with extra defaults
+    const { registerAppear } = await import("@appear.sh/introspector/nextjs")
     registerAppear({
       apiKey: process.env.APPEAR_REPORTING_KEY,
       environment: process.env.NODE_ENV,
       serviceName: "User Service",
-      interception: {
-        filter: (request, response, config) => {
-          // extended filter which ensures internal next requests are not shown
-          return (
-            !request.url.includes("/_next/") &&
-            defaultInterceptFilter(request, response, config)
-          )
-        },
-      },
     })
   }
 }
 ```
+
+**Notes:**
+Next.js preset from `/nextjs` entrypoint comes with tailored `defaultInterceptFilter` which filters out all `/_next/` and all non-json responses. If you want to extend the filter you can using `import { defaultInterceptFilter } from "@appear.sh/introspector/nextjs"`
 
 ---
 
@@ -323,6 +318,31 @@ export interface AppearConfig {
     ) => boolean
   }
 }
+```
+
+### Example of custom interception filter
+
+In some situations it's desirable to filter out certain traffic from being reported to Appear. For example the service is redirecting unauthorized requests using 3XX status code which is normally considered as successful and it's creating noise.
+
+```ts
+import {
+  registerAppear,
+  defaultInterceptFilter,
+} from "@appear.sh/introspector/nextjs"
+
+registerAppear({
+  apiKey: process.env.APPEAR_REPORTING_KEY,
+  environment: process.env.NODE_ENV,
+  serviceName: "User Service",
+  interception: {
+    filter: (request, response, config) => {
+      return (
+        defaultInterceptFilter(request, response, config) &&
+        !(response.status >= 300 && response.status < 400) // ignore redirects
+      )
+    },
+  },
+})
 ```
 
 ## FAQ
